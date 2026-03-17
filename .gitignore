@@ -1,0 +1,37 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment & secrets
+.env
+*.json
+!pyproject.toml
+
+# uv
+.python-version
+
+# dbt
+dbt/target/
+dbt/logs/
+dbt/.user.yml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data — never commit real health data
+data/
+*.csv
+*.parquet
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
