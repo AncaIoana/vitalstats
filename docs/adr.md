@@ -597,3 +597,80 @@ Apply a layered security strategy where each phase introduces the security contr
 - AWS infrastructure will be private, encrypted, and auditable from day one of Phase 2
 - LLM prompts will be auditable and will not unnecessarily expose raw health records to third parties
 - Security controls are in Terraform — reviewable, reproducible, destroyable cleanly
+
+---
+
+## ADR-017: Parser validation notifications for unexpected field values
+
+**Date:** 2026-03  
+**Status:** Accepted (implementation deferred to Phase 1b)
+
+**Context:**  
+The ingestion pipeline has hard failures (abort) and soft failures (skip row, log). But there is a third category: values that are technically parseable and don't break the pipeline, but are unexpected or suspicious — a date that parses but is implausible (e.g. year 0204), a medication frequency outside a normal range, a vaccine name that's close to a known slug but not an exact match. These currently pass through silently.
+
+**Decision:**  
+Add a **validation notification layer** to all ingestion scripts. This runs after parsing, before loading, and emits structured warnings for any field value that is parseable but suspicious. Warnings are:
+
+- Written to `silver.stg_unknown_values` with `risk_level = "low"` and `field = "validation_warning"`
+- Included in `pipeline_run_log.rows_skipped_detail` JSONB with `"type": "validation_warning"`
+- Set `pipeline_run_log.status = "partial"` if any warnings were emitted
+
+**What triggers a validation warning (not exhaustive — extended per source):**
+
+*All sources:*
+- Date parses but year < 2000 or year > current year + 1
+- Date parses but is in the future by more than 2 years
+- Any field value not in the known values registry (ADR-014)
+
+*Blood tests:*
+- Result numeric is an extreme outlier (> 10x the reference range high)
+- Unit not in the canonical unit list for that analyte
+- Reference interval format not matching any known pattern
+
+*Medications:*
+- Frequency per day > 10 (likely data entry error)
+- End date before start date
+- Medication name fuzzy-matches a known slug but is not an exact match (e.g. `"Ferrous sulfade"` vs `"ferrous_sulfate"`) — ingest with the correction applied, but log the original
+
+*Vaccines:*
+- Booster due year more than 30 years in the future
+- Vaccine name not in the known vaccines registry
+- Date given in the future
+
+**Implementation:**
+
+```python
+def validate_field(field: str, value, rules: list[callable]) -> list[dict]:
+    warnings = []
+    for rule in rules:
+        result = rule(value)
+        if result:
+            warnings.append({"field": field, "value": str(value), "reason": result})
+    return warnings
+
+# Example rules
+def year_plausible(dt: date) -> str | None:
+    if dt.year < 2000 or dt.year > date.today().year + 1:
+        return f"Implausible year: {dt.year}"
+    return None
+
+def frequency_plausible(freq: float) -> str | None:
+    if freq is not None and freq > 10:
+        return f"Unusually high frequency: {freq} times/day"
+    return None
+```
+
+All warnings are non-blocking. The row is still ingested. The warning is logged.
+
+**Note:** The `"15-Feb-0204"` date in the medications source was a known entry error that has since been corrected in the source sheet. The parser correction (`if raw == "15-Feb-0204": return date(2024, 2, 15)`) can be removed once confirmed fixed. The year plausibility rule above would have caught this automatically.
+
+**Alternatives considered:**
+- Fail hard on implausible values: too brittle — a plausible-but-wrong date shouldn't block 200 rows
+- Ignore suspicious values: dangerous — silent data quality issues are hard to detect downstream
+- Separate validation service: overkill at this scale; JSONB column in pipeline_run_log is sufficient
+
+**Consequences:**
+- No data is ever lost due to a suspicious value — raw is always preserved
+- Suspicious values are immediately visible in SQL without hunting through logs
+- `status = "partial"` makes runs with warnings visibly distinct from clean runs
+- Implementation is deferred to Phase 1b — Phase 1 uses the simpler hard/soft failure model only

@@ -140,6 +140,7 @@ A Python script that reads your blood test Google Sheet, stores the raw data, tr
 - [ ] README with setup instructions
 - [ ] `.gitignore` covers credentials, `.env`, service account JSON
 - [ ] Synthetic fixture files for all tests (no real health data in repo)
+- [ ] Medications + vaccines ingestion (Phase 1b — after blood tests pipeline is stable)
 
 ---
 
@@ -242,6 +243,7 @@ A Python script that reads your blood test Google Sheet, stores the raw data, tr
 | **Medical letters** | PDF parsing (pdfplumber / AWS Textract) | Diagnoses, medication, GP notes |
 | **Google Fit / Health Connect** | Health Connect Android API or Google Takeout | Activity, weight, nutrition |
 | **Zoe** | Manual export (CSV) or investigate their API | Gut health scores, food responses |
+| **Medications & Vaccines Google Sheet** | Google Sheets API v4 | Medication history, dosage changes, vaccine records |
 | **Blood tests Google Sheet** | Already done ✅ | |
 
 ### Cross-source ML opportunities
@@ -249,6 +251,12 @@ Once you have Fitbit + blood tests together:
 - "Your HbA1c is highest in months where your average daily steps were below 5,000"
 - "Your ferritin drops correlate with months of poor sleep (< 6.5 hrs avg)"
 - "Your resting heart rate spikes 3 days after your cholesterol is elevated"
+
+Once medications data is added:
+- "Your ferritin improves when ferrous sulfate dose increases — current dose may be insufficient"
+- "Your ALT elevation correlates with active Metyrapone periods — worth discussing with your endocrinologist"
+- "Your cholesterol markers are within range while on Simvastatin — review if dose is still appropriate"
+- Medication active flag becomes a feature in every blood test model — results should be interpreted in context of what you were taking
 
 Once Flo is added:
 - "Your ALT is consistently higher in the luteal phase of your cycle"

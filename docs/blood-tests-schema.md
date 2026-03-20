@@ -258,6 +258,21 @@ Once more readings exist and Fitbit data is added:
 
 ---
 
+## Parser Validation Notifications
+
+All parsers emit structured warnings for field values that are technically valid but suspicious. Warnings are non-blocking — the row is still ingested — but are logged to `silver.stg_unknown_values` and included in `pipeline_run_log.rows_skipped_detail`. See ADR-017.
+
+**Triggers for blood tests:**
+- Result numeric > 10x the reference range high for that analyte
+- Date parses but year < 2000 or year > current year + 1
+- Unit not in the canonical unit list for that analyte
+- Reference interval format matches no known pattern
+- Analyte name fuzzy-matches a known slug but is not an exact match
+
+**Implementation note:** Deferred to Phase 1b. Phase 1 uses hard/soft failure model only.
+
+---
+
 ## Known Values Registry
 
 Maintained in `ingestion/config/known_values.py`. This is the canonical list of expected values for key fields. Any value arriving from the source that is not in this registry triggers detection logic (see ADR-014).

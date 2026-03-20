@@ -33,6 +33,7 @@ s3://vitalStats-raw/
 │   └── 2026-03-01/menoscale.csv
 ├── fitbit/                                   ← Phase 4
 ├── flo/                                      ← Phase 4
+├── medications_vaccines/                      ← Phase 1b
 ├── medical_letters/                          ← Phase 4
 └── health_connect/                           ← Phase 4
 ```
@@ -186,6 +187,68 @@ CREATE TABLE silver.stg_flo_symptoms (
 
 ---
 
+### `silver.stg_medications`
+One row per medication period. Same medication appears multiple times as dosage or frequency changes over time.
+
+```sql
+CREATE TABLE silver.stg_medications (
+    stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    medication_name      TEXT NOT NULL,
+    medication_slug      TEXT NOT NULL,                     -- "metyrapone", "ferrous_sulfate" etc.
+    dosage_raw           TEXT,                              -- "250mg", "1500mg/400unit" — as-is from source
+    dosage_value         NUMERIC(10, 4),                    -- parsed numeric component
+    dosage_unit          TEXT,                              -- "mg", "mg/unit" etc.
+    start_date           DATE NOT NULL,
+    end_date             DATE,                              -- NULL = ongoing
+    is_ongoing           BOOLEAN NOT NULL DEFAULT FALSE,
+    frequency_per_day    NUMERIC(4, 2),                     -- 0 = paused/stopped; 0.5 = alternate days
+    is_active            BOOLEAN NOT NULL,
+    notes                TEXT,
+    source_row_hash      TEXT NOT NULL,
+    loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_stg_med_slug ON silver.stg_medications(medication_slug);
+CREATE INDEX idx_stg_med_dates ON silver.stg_medications(start_date, end_date);
+```
+
+**Key transformation logic:**
+- Normalise names to slugs: `"Ferrous sulfade"` → `ferrous_sulfate` (fix typo in source)
+- Parse dosage: `"250mg"` → `dosage_value = 250`, `dosage_unit = "mg"`
+- Known bad date: `"15-Feb-0204"` → correct to `2024-02-15`
+- `is_active = TRUE` where `frequency_per_day > 0 AND (end_date IS NULL OR end_date >= CURRENT_DATE)`
+
+---
+
+### `silver.stg_vaccines`
+One row per vaccine administration. Anca rows only — Lukasz rows filtered out at ingestion.
+
+```sql
+CREATE TABLE silver.stg_vaccines (
+    stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    vaccine_name         TEXT NOT NULL,
+    vaccine_slug         TEXT NOT NULL,                     -- "flu_influenza", "covid_19", "dtp" etc.
+    date_given           DATE NOT NULL,
+    immunity_duration_text TEXT,                            -- "1 year", "Lifelong", "Part of 3-dose course"
+    booster_due_year     INTEGER,                           -- parsed from 2028.0 → 2028
+    booster_due_date     DATE,                              -- derived: YYYY-01-01 from booster_due_year
+    notes                TEXT,
+    source_row_hash      TEXT NOT NULL,
+    loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_stg_vax_slug ON silver.stg_vaccines(vaccine_slug);
+CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_given);
+```
+
+**Key transformation logic:**
+- Filter: only ingest rows WHERE `Name = 'Anca'` — Lukasz rows discarded at staging
+- Strip trailing spaces: `"Covid-19 "` → `"Covid-19"`
+- Parse booster_due integer: `2028.0` → `booster_due_year = 2028`, `booster_due_date = 2028-01-01`
+- Unparseable booster_due (e.g. `"See 3rd dose date"`) → both NULL, value stored in notes
+
+---
+
 ## Gold Layer — PostgreSQL
 
 ### `gold.mart_blood_trends`
@@ -229,7 +292,7 @@ The unified event log. **Every data source eventually lands here.** Foundation f
 CREATE TABLE gold.mart_health_timeline (
     event_id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_date           DATE NOT NULL,
-    event_type           TEXT NOT NULL,                     -- "blood_test" | "sleep" | "activity" | "menoscale" | "medical_letter"
+    event_type           TEXT NOT NULL,                     -- "blood_test" | "sleep" | "activity" | "menoscale" | "medication" | "vaccine" | "medical_letter"
     source_system        TEXT NOT NULL,                     -- "google_sheets" | "fitbit" | "health_connect" | "pdf"
     category             TEXT,                              -- "Biochemistry" | "Hematology" | "lifestyle" | etc.
     metric_name          TEXT,                              -- analyte_slug or metric name
@@ -281,6 +344,17 @@ CREATE TABLE gold.mart_ml_features (
     fitbit_sleep_total_mins                INTEGER,
     fitbit_resting_hr                      NUMERIC,
     fitbit_hrv_rmssd                       NUMERIC,
+
+    -- Medication features (Phase 1b)
+    med_metyrapone_active                  BOOLEAN,        -- is metyrapone active on this date
+    med_metyrapone_freq_per_day            NUMERIC,
+    med_ferrous_sulfate_active             BOOLEAN,
+    med_ferrous_sulfate_freq_per_day       NUMERIC,
+    -- ... one set per tracked medication
+
+    -- Vaccine features (Phase 1b)
+    vax_days_since_last_flu                INTEGER,
+    vax_days_since_last_covid              INTEGER,
 
     -- Derived features
     days_since_last_blood_test             INTEGER,
