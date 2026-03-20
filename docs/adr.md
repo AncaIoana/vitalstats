@@ -597,7 +597,9 @@ Apply a layered security strategy where each phase introduces the security contr
 - AWS infrastructure will be private, encrypted, and auditable from day one of Phase 2
 - LLM prompts will be auditable and will not unnecessarily expose raw health records to third parties
 - Security controls are in Terraform — reviewable, reproducible, destroyable cleanly
-
+- Repository is public — this is intentional for portfolio visibility. 
+  All security controls above (no credentials, synthetic fixtures, no real 
+  health data) are non-negotiable precisely because the repo is public.
 ---
 
 ## ADR-017: Parser validation notifications for unexpected field values
