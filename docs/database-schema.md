@@ -213,22 +213,21 @@ CREATE INDEX idx_stg_med_dates ON silver.stg_medications(start_date, end_date);
 ```
 
 **Key transformation logic:**
-- Normalise names to slugs: `"Ferrous sulfade"` → `ferrous_sulfate` (fix typo in source)
+- Normalise names to slugs: `"Ferrous Sulfate"` → `ferrous_sulfate`
 - Parse dosage: `"250mg"` → `dosage_value = 250`, `dosage_unit = "mg"`
-- Known bad date: `"15-Feb-0204"` → correct to `2024-02-15`
 - `is_active = TRUE` where `frequency_per_day > 0 AND (end_date IS NULL OR end_date >= CURRENT_DATE)`
 
 ---
 
 ### `silver.stg_vaccines`
-One row per vaccine administration. Anca rows only — Lukasz rows filtered out at ingestion.
+One row per vaccine administration. Tracked person rows only — partner rows filtered out at ingestion.
 
 ```sql
 CREATE TABLE silver.stg_vaccines (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vaccine_name         TEXT NOT NULL,
     vaccine_slug         TEXT NOT NULL,                     -- "flu_influenza", "covid_19", "dtp" etc.
-    date_given           DATE NOT NULL,
+    date_administered           DATE NOT NULL,
     immunity_duration_text TEXT,                            -- "1 year", "Lifelong", "Part of 3-dose course"
     booster_due_year     INTEGER,                           -- parsed from 2028.0 → 2028
     booster_due_date     DATE,                              -- derived: YYYY-01-01 from booster_due_year
@@ -238,11 +237,11 @@ CREATE TABLE silver.stg_vaccines (
 );
 
 CREATE INDEX idx_stg_vax_slug ON silver.stg_vaccines(vaccine_slug);
-CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_given);
+CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_administered);
 ```
 
 **Key transformation logic:**
-- Filter: only ingest rows WHERE `Name = 'Anca'` — Lukasz rows discarded at staging
+- Filter: only ingest rows WHERE `Name = TRACKED_PERSON_NAME` (env var) — partner rows discarded at staging
 - Strip trailing spaces: `"Covid-19 "` → `"Covid-19"`
 - Parse booster_due integer: `2028.0` → `booster_due_year = 2028`, `booster_due_date = 2028-01-01`
 - Unparseable booster_due (e.g. `"See 3rd dose date"`) → both NULL, value stored in notes
