@@ -13,7 +13,6 @@ build/
 !pyproject.toml
 
 # uv
-.python-version
 
 # dbt
 dbt/target/

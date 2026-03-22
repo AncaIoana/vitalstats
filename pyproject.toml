@@ -1,0 +1,23 @@
+[project]
+name = "vitalstats"
+version = "0.1.0"
+description = "Personal health intelligence platform"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "psycopg2-binary",
+    "google-auth",
+    "google-auth-oauthlib",
+    "google-api-python-client",
+    "dbt-postgres",
+    "boto3",
+    "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "ruff",
+]
