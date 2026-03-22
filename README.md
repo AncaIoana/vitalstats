@@ -1,4 +1,5 @@
 # vitalStats 💉
+
 ### Personal Health Intelligence Platform
 
 A personal health data platform that ingests data from multiple sources, processes and stores it cleanly, and uses ML/AI to surface actionable, personalised health insights.
@@ -173,6 +174,24 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
+Then activate it and check the version
+```
+source $HOME/.local/bin/env
+uv --version
+```
+
+And initialise the project
+```
+uv python pin 3.11
+uv init --no-readme --no-workspace
+```
+
+Once set up, start the environment with
+```
+uv sync
+```
+
+
 ### 1. Clone the repo
 
 ```bash
@@ -241,40 +260,46 @@ brew update
 brew install node@22
 ```
 
-2. Force-link that version so it is the active "node"
+1. Force-link that version so it is the active "node"
+
 ```
 brew unlink node 2>/dev/null || true
 brew link --overwrite --force node@22
 ```
 
-3. Put node@22 bin first in PATH (choose ONE line)
+1. Put node@22 bin first in PATH (choose ONE line)
 
 Apple Silicon:
+
 ```
 echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> ~/.zshrc
 ```
 
 Intel Mac:
+
 ```
 echo 'export PATH="/usr/local/opt/node@22/bin:$PATH"' >> ~/.zshrc
 ```
 
-4. Reload shell and clear command cache
+1. Reload shell and clear command cache
+
 ```
 source ~/.zshrc
 hash -r
 ```
 
-5. Verify
+1. Verify
+
 ```
 type -a node
 node -v
 npm -v
 ```
 
-6. Run
+1. Run
+
 ```
-cd /Users/anca/vitalStats
+cd /Users/Poirot/vitalStats
 npm create vite@latest vs-board -- --template react
 cd vs-board
 npm install
@@ -290,6 +315,27 @@ uv remove <package>         # remove a dependency
 ```
 
 Always commit both `pyproject.toml` and `uv.lock` — the lock file is what guarantees reproducibility.
+
+---
+
+## Running tests
+
+Install dependencies:
+```bash
+uv sync
+```
+
+Run all tests:
+```bash
+uv run pytest
+```
+
+Run with coverage:
+```bash
+uv run pytest --cov=ingestion
+```
+
+All test data is synthetic. No real health data is used in tests.
 
 ---
 
