@@ -30,11 +30,7 @@
 
 ### Date Format
 
-Most dates are Excel datetime objects. One known bad date exists:
-
-| Raw value | Issue | Correct value |
-|---|---|---|
-| `"15-Feb-0204"` | Year typo — should be 2024 | `2024-02-15` |
+Most dates are Excel datetime objects. Parser handles both Excel datetime objects and string formats.
 
 **Parser:**
 ```python
@@ -47,9 +43,6 @@ def parse_medication_date(raw) -> date | None:
         return raw.date()
     if isinstance(raw, str):
         raw = raw.strip()
-        # Known bad date fix
-        if raw == "15-Feb-0204":
-            return date(2024, 2, 15)
         for fmt in ("%d-%b-%Y", "%d-%B-%Y", "%Y-%m-%d"):
             try:
                 return datetime.strptime(raw, fmt).date()
@@ -63,10 +56,10 @@ def parse_medication_date(raw) -> date | None:
 | Raw name | Canonical slug | Notes |
 |---|---|---|
 | `Centrum advance` | `centrum_advance` | Multivitamin |
-| `Evacal D3` | `evacal_d3` | Calcium + Vitamin D |
-| `Ferrous sulfade` | `ferrous_sulfate` | Typo in source — normalise on ingest |
+| `Evacal D3` | `evacal_d3` | Calcium + Vitamin D supplement |
+| `Ferrous Sulfate` | `ferrous_sulfate` | Iron supplement |
 | `Lansoprazole-orodispersible` | `lansoprazole` | PPI |
-| `Metyrapone` | `metyrapone` | Cushing's treatment — clinically significant |
+| `Metyrapone` | `metyrapone` | Clinically significant — monitor relevant markers |
 | `Omeprazole` | `omeprazole` | PPI |
 | `Simvastatin` | `simvastatin` | Statin |
 
@@ -84,10 +77,8 @@ Note: `0.5` means alternating between 1 per day and 0 per day — noted in sourc
 
 | Issue | Example | Handling |
 |---|---|---|
-| Typo in medication name | `"Ferrous sulfade"` (should be sulfate) | Normalise to slug `ferrous_sulfate` on ingest |
-| Bad year in date | `"15-Feb-0204"` | Hardcode correction to `2024-02-15` in parser |
 | Overlapping date ranges | Ferrous sulfate has overlapping periods | Hash dedup catches exact duplicates; overlaps stored as-is, reviewed manually |
-| Frequency = 0 rows | Metyrapone paused for surgery | Store as-is; `is_active = FALSE` |
+| Frequency = 0 rows | Medication paused temporarily | Store as-is; `is_active = FALSE` |
 
 ---
 
@@ -97,20 +88,22 @@ Note: `0.5` means alternating between 1 per day and 0 per day — noted in sourc
 
 | Column | Raw name | Type in source | Notes |
 |---|---|---|---|
-| Person | `Name` | String | `"Anca"` or `"Lukasz"` — **filter to Anca only** |
+| Person | `Name` | String | Two people in sheet — **filter to tracked person only** |
 | Date Given | `Date Given` | Excel datetime | Consistent format |
-| Vaccine | `Vaccine Name & Dose` | String | Trailing spaces common — strip on ingest |
+| Vaccine | `Vaccine Name & Dose` | String | Strip whitespace on ingest |
 | Immunity Duration | `Immunity Duration (Years)` | String | Free text — `"1 year"`, `"Lifelong"`, `"Part of 3-dose course"` |
 | Booster Due | `Booster Due` | Mixed | Year integer (2028.0), NULL, or string — see below |
 | Notes | `Notes` | String | Free text |
 
 ### Critical Filtering Rule
 
-**Only rows where `Name = 'Anca'` are ingested. Lukasz rows are discarded at the Python ingestion stage before loading into Silver.**
+**Only rows belonging to the tracked person are ingested. Partner rows are discarded at the Python ingestion stage before loading into Silver.**
 
 ```python
-vaccines_df = vaccines_df[vaccines_df['Name'].str.strip() == 'Anca']
+vaccines_df = vaccines_df[vaccines_df['Name'].str.strip() == TRACKED_PERSON_NAME]
 ```
+
+`TRACKED_PERSON_NAME` is loaded from an environment variable — never hardcoded in the script.
 
 ### Booster Due Column — Parsing Rules
 
@@ -132,12 +125,11 @@ def parse_booster_due(raw):
     return None, None  # string values → store in notes instead
 ```
 
-### Observed Vaccines (Anca only)
+### Observed Vaccines (tracked person only)
 
 | Raw vaccine name | Canonical slug |
 |---|---|
 | `Flu (Influenza)` | `flu_influenza` |
-| `Covid-19 ` (trailing space) | `covid_19` |
 | `Covid-19` | `covid_19` |
 | `DTP (Diptheria, Tetanus & Polio Combined)` | `dtp` |
 | `Typhoid` | `typhoid` |
@@ -150,10 +142,8 @@ def parse_booster_due(raw):
 
 | Issue | Example | Handling |
 |---|---|---|
-| Trailing spaces in vaccine names | `"Covid-19 "` | Strip whitespace on ingest |
-| Inconsistent Covid name | `"Covid-19 "` vs `"Covid-19"` | Both normalise to slug `covid_19` |
 | Multi-dose vaccines | HPV appears as 1st/2nd/3rd dose | All map to same `vaccine_slug = "hpv"` |
-| Old records with superseded boosters | Typhoid 2016 with `"there is a more recent record"` | Ingest all; latest record takes precedence in Gold mart |
+| Old records with superseded boosters | Typhoid with `"there is a more recent record"` | Ingest all; latest record takes precedence in Gold mart |
 | Booster due as string | `"See 3rd dose date"` | Parse to NULL; log in notes field |
 
 ---
@@ -162,11 +152,11 @@ def parse_booster_due(raw):
 
 Medication data is particularly valuable for enriching blood test analysis:
 
-- **Metyrapone vs cortisol/ALT:** Metyrapone is a cortisol synthesis inhibitor. ALT has been persistently elevated — correlating ALT with Metyrapone dose and active periods could be clinically significant.
+- **Clinically significant medication vs relevant markers:** Correlating active periods and dosage changes with corresponding lab markers can surface clinically meaningful trends worth discussing with a specialist.
 - **Ferrous sulfate vs ferritin:** Direct relationship — ferritin levels should respond to iron supplementation. Visualising ferritin trend against iron supplement dose is a key insight.
 - **Simvastatin vs cholesterol:** Direct relationship — cholesterol markers should correlate with statin use.
 - **Omeprazole/Lansoprazole periods:** PPI use may affect absorption of other medications; worth flagging in ML features.
-- **Medication active flag as ML feature:** `med_metyrapone_active` becomes a binary feature in every blood test model — blood results should be interpreted differently depending on whether Metyrapone was active at the time.
+- **Medication active flag as ML feature:** `med_<slug>_active` becomes a binary feature in every blood test model — blood results should be interpreted differently depending on what was active at the time.
 
 ---
 
@@ -185,8 +175,6 @@ All parsers emit structured warnings for field values that are technically valid
 - Booster due year more than 30 years in the future
 - Vaccine name not in the known vaccines registry
 
-**Note:** The `"15-Feb-0204"` date has been corrected in the source sheet. The parser hardcode can be removed once confirmed. The year plausibility rule would have caught this automatically.
-
 **Implementation note:** Deferred to Phase 1b. Phase 1 uses hard/soft failure model only.
 
 ---
@@ -198,6 +186,7 @@ All parsers emit structured warnings for field values that are technically valid
 **Inputs:**
 - Google Sheets API credentials (same service account as blood tests)
 - Sheet ID (env var `MEDICATIONS_SHEET_ID`)
+- Tracked person name (env var `TRACKED_PERSON_NAME`)
 - Tab names: `Medications`, `Vaccines`
 
 **Outputs:**
@@ -207,6 +196,6 @@ All parsers emit structured warnings for field values that are technically valid
 
 **Validation checks (pre-load):**
 1. Expected columns present in both tabs (raise if missing)
-2. At least one row with `Name = 'Anca'` in Vaccines tab
-3. All Start Dates parseable (log bad dates, don't crash — apply known corrections first)
+2. At least one row for the tracked person in Vaccines tab
+3. All Start Dates parseable (log bad dates, don't crash)
 4. Row count >= previous run (alert if rows disappear)
