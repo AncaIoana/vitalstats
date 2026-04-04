@@ -27,8 +27,7 @@
 | Unit | `Unit` | String | Often inconsistent across labs |
 | Reference Interval | `Reference Interval` | String | Highly variable format — see below |
 | Collection | `Collection` | String | Lab / practice name |
-| Notes | `Notes ` | String | Trailing space in header — strip on ingest |
-
+| Notes | `Notes` | String | No trailing space in current source |
 ---
 
 ### Date Format
@@ -53,10 +52,10 @@ All dates are in the format `D-Mon-YYYY` where Mon is a 3-letter English month a
 | `Hematology` | Blood cell counts, iron studies, coagulation |
 | `Immunochemistry` | Antibodies, immunological markers |
 | `Microbiology` | Cultures, PCR, pathogen detection |
-| `Quantitv faecal immunochem tst` | Faecal immunochemical test (FIT) — typo in source, normalise |
-| `Quantity faecal immunochem tst` | Same test, different spelling — deduplicate to single value |
+| `Endocrinology` | Hormonal markers (cortisol, TSH, FSH, LH, ACTH etc.) |
+| `Coagulation` | Clotting studies (INR, aPTT, prothrombin time) |
 
-**Normalised slug:** `biochemistry`, `hematology`, `immunochemistry`, `microbiology`, `fit_test`
+**Normalised slug:** `biochemistry`, `hematology`, `immunochemistry`, `microbiology`, `endocrinology`, `coagulation`
 
 ---
 
@@ -117,12 +116,19 @@ Highly inconsistent. Applied in dbt staging model.
 
 ### Collection Sites (observed values)
 
-| Raw value | Normalised | Country | Type |
+| Raw value | Normalised | Country | Unit system |
 |---|---|---|---|
-| `New Islington Medical Practice` | `new_islington_gp` | UK | NHS GP |
-| `Salford Royal` | `salford_royal` | UK | NHS Hospital |
-| `Nuffield Health` | `nuffield_health` | UK | Private |
-| `Synevo` | `synevo` | Romania | Private lab |
+| `New Islington Medical Practice` | `new_islington_gp` | UK | SI |
+| `Salford Royal` | `salford_royal` | UK | SI |
+| `Nuffield Health` | `nuffield_health` | UK | SI |
+| `Pall Mall` | `pall_mall` | UK | SI |
+| `Synevo` | `synevo` | Romania | Conventional |
+
+**Unit system values follow IFCC terminology:**
+- `SI` — international standard (mmol/L, μmol/L, nmol/L etc.). Used by NHS and all UK labs in this dataset.
+- `conventional` — older conventional units (mg/dL etc.). Primary system at Synevo Romania.
+
+Note: `unit_system` describes the lab's primary convention, not a guarantee that every analyte uses that system. Individual analyte conversion is always handled in dbt by inspecting the `Unit` column directly. `mg/dL` rows exist at Salford Royal too (2 rows: Calcium ionic) — dbt handles these by unit, not by site.
 
 ---
 
@@ -285,17 +291,18 @@ Maintained in `ingestion/config/known_values.py`. This is the canonical list of 
 | `Hematology` | `hematology` | Hard failure — unknown test type |
 | `Immunochemistry` | `immunochemistry` | Hard failure — unknown test type |
 | `Microbiology` | `microbiology` | Hard failure — unknown test type |
-| `Quantitv faecal immunochem tst` | `fit_test` | Hard failure — unknown test type |
-| `Quantity faecal immunochem tst` | `fit_test` | Hard failure — unknown test type |
+| `Endocrinology` | `endocrinology` | Hard failure — unknown test type |
+| `Coagulation` | `coagulation` | Hard failure — unknown test type |
 
 ### Expected collection sites
 
-| Raw value | Normalised slug | Country | Unit convention | Action if new value arrives |
+| Raw value | Normalised slug | Country | Unit system | Action if new value arrives |
 |---|---|---|---|---|
-| `New Islington Medical Practice` | `new_islington_gp` | UK | NHS (mmol/L) | Partial run + warning |
-| `Salford Royal` | `salford_royal` | UK | NHS (mmol/L) | Partial run + warning |
-| `Nuffield Health` | `nuffield_health` | UK | NHS (mmol/L) | Partial run + warning |
-| `Synevo` | `synevo` | Romania | mg/dL → convert | Partial run + warning |
+| `New Islington Medical Practice` | `new_islington_gp` | UK | SI | Partial run + warning |
+| `Salford Royal` | `salford_royal` | UK | SI | Partial run + warning |
+| `Nuffield Health` | `nuffield_health` | UK | SI | Partial run + warning |
+| `Pall Mall` | `pall_mall` | UK | SI | Partial run + warning |
+| `Synevo` | `synevo` | Romania | Conventional | Partial run + warning |
 
 ### What happens when an unknown value is detected
 

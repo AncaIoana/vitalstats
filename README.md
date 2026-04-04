@@ -27,6 +27,20 @@ Built for one user. Designed to grow.
 | Phase 5 | Frontend: Streamlit dashboard | ⏳ Planned |
 | Phase 6 | Streaming, RAG, MLflow, feature store, monitoring | ⏳ Planned |
 
+### Phase 1 progress
+
+| Story | Description | Status |
+|---|---|---|
+| s53 | Set up .gitignore for credentials and sensitive files | ✅ Done |
+| s54 | Create synthetic fixture data for all tests | ✅ Done |
+| s01 | Create GitHub repo + folder structure | ✅ Done |
+| s02 | Write README and project docs | ✅ Done |
+| s12 | Set up local PostgreSQL + schemas | ✅ Done |
+| s13 | Create pipeline_state + pipeline_run_log tables | ✅ Done |
+| s03 | Enable Google Sheets API + service account | ✅ Done |
+| s04 | Write extract.py for blood_tests_bulk | ✅ Done |
+| s05 | Write extract.py for menoscale tab | 🔲 Next |
+
 ---
 
 ## Architecture
@@ -234,6 +248,12 @@ DB_PASSWORD=your_password
 psql -U your_user -d vitalstats -f docs/database-schema.sql
 ```
 
+start PostgreSQL
+
+```bash
+brew services start postgresql@14
+```
+
 ### 5. Configure dbt
 
 ```bash
@@ -317,6 +337,106 @@ uv remove <package>         # remove a dependency
 Always commit both `pyproject.toml` and `uv.lock` — the lock file is what guarantees reproducibility.
 
 ---
+
+## Daily working session
+
+Everything you need to do when you sit down to work.
+
+### 1. Start PostgreSQL
+```bash
+brew services start postgresql@14
+```
+
+Verify it's running:
+```bash
+brew services list | grep postgres
+```
+
+You should see `started` next to your version.
+
+### 2. Open the kanban board
+```bash
+cd /Users/anca/vitalStats/vs-board
+npm run dev
+```
+
+Then open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### 3. Activate the project environment
+
+All Python commands in this project are prefixed with `uv run` — no manual activation needed. But if you want shell completion or to run scripts directly:
+```bash
+cd /Users/anca/vitalStats
+source .venv/bin/activate
+```
+
+### 4. Pick up where you left off
+
+Check your current branch:
+```bash
+git status
+git branch
+```
+
+Create a feature branch for a new story if starting something new:
+```bash
+git checkout dev
+git pull
+git checkout -b feature/your-story-name
+```
+
+---
+
+## Adding new blood test results
+
+When you have new test results to add to the Google Sheet and want them ingested:
+
+### 1. Add the results to the Google Sheet
+
+Open your Blood Tests Google Sheet and add the new rows to the `blood_tests_bulk` tab. Make sure:
+- Date is in `D-Mon-YYYY` format (e.g. `6-Apr-2023`)
+- Test Type matches a known value exactly (see `ingestion/config/known_values.py`)
+- Collection matches a known site exactly
+
+### 2. Start PostgreSQL if not already running
+```bash
+brew services start postgresql@14
+```
+
+### 3. Run the ingestion pipeline
+```bash
+cd /Users/anca/vitalStats
+uv run python -m ingestion.google_sheets.extract
+```
+
+### 4. Check the output
+
+The log output tells you what happened. A clean run looks like:
+
+```
+INFO Run started. run_id=... source=blood_tests_bulk
+INFO Fetched 530 non-empty rows
+INFO 6 new rows to insert, 524 duplicates skipped
+INFO Raw JSON written to data/raw/blood_tests/YYYY-MM-DD/blood_tests_bulk.json
+INFO Inserted 6 rows into raw.blood_tests_raw
+INFO Run complete. status=success
+```
+### 5. Verify in the database
+```bash
+psql vitalstats -c "SELECT COUNT(*) FROM raw.blood_tests_raw;"
+psql vitalstats -c "SELECT source, rows_fetched, rows_ingested, rows_skipped, status FROM raw.pipeline_run_log ORDER BY started_at DESC LIMIT 3;"
+```
+
+### 6. If you see a warning about an unknown test type or collection site
+
+An unknown **test type** will abort the run. Check `ingestion/config/known_values.py` and add the new value, then re-run.
+
+An unknown **collection site** will complete with `status=partial`. Review the entry in:
+```bash
+psql vitalstats -c "SELECT * FROM silver.stg_unknown_values WHERE resolved = FALSE;"
+```
+
+Follow the resolution workflow in `docs/blood-tests-schema.md` under *What happens when an unknown value is detected*.
 
 ## Running tests
 
