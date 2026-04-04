@@ -26,8 +26,8 @@ const INITIAL_STORIES = [
 
   // Ingestion — Google Sheets API, then parsers, then pipeline hardening
   { id: "s03", phase: "phase1", epic: "Ingestion", title: "Enable Google Sheets API + service account", status: "backlog", priority: "high", notes: "Create service account, store credentials in .env. Never commit to git." },
-  { id: "s04", phase: "phase1", epic: "Ingestion", title: "Write extract.py for blood_tests_bulk", status: "backlog", priority: "high", notes: "Read tab via API. Validate expected columns. Write raw JSON to /data/raw/." },
-  { id: "s05", phase: "phase1", epic: "Ingestion", title: "Write extract.py for menoscale tab", status: "backlog", priority: "medium", notes: "Handle two date formats (hyphen + space). See blood-tests-schema.md for parser." },
+  { id: "s04", phase: "phase1", epic: "Ingestion", title: "Write extract_blood_tests.py for blood_tests_bulk", status: "backlog", priority: "high", notes: "Read tab via API. Validate expected columns. Write raw JSON to /data/raw/." },
+  { id: "s05", phase: "phase1", epic: "Ingestion", title: "Write extract_menoscale.py for menoscale tab", status: "backlog", priority: "medium", notes: "Handle two date formats (hyphen + space). See blood-tests-schema.md for parser." },
   { id: "s07", phase: "phase1", epic: "Ingestion", title: "Build result parser (parse_result.py)", status: "backlog", priority: "high", notes: "Handle numeric, <value, >value, negative, Not Detected, free text. See blood-tests-schema.md." },
   { id: "s08", phase: "phase1", epic: "Ingestion", title: "Build reference interval parser", status: "backlog", priority: "medium", notes: "Handle range, lt, gt, N/A, narrative, Adults: pattern, empty." },
   { id: "s06", phase: "phase1", epic: "Ingestion", title: "Implement hash-based deduplication", status: "backlog", priority: "high", notes: "SHA-256 hash of all fields. Compare against raw.blood_tests_raw on each run. ADR-005." },
@@ -49,7 +49,7 @@ const INITIAL_STORIES = [
   { id: "s22", phase: "phase1", epic: "Analysis", title: "Write generate_report.py", status: "backlog", priority: "medium", notes: "Plain-text summary: HbA1c trending up, Vitamin D in range, Ferritin below range." },
 
   // CI/CD — once the pipeline works end-to-end
-  { id: "s24", phase: "phase1", epic: "CI/CD", title: "Write unit tests (pytest)", status: "backlog", priority: "high", notes: "Test extract.py, parse_result.py, reference interval parser, dedup logic." },
+  { id: "s24", phase: "phase1", epic: "CI/CD", title: "Write unit tests (pytest)", status: "backlog", priority: "high", notes: "Test extract_blood_tests.py, extract_menoscale.py, parse_result.py, reference interval parser, dedup logic." },
   { id: "s25", phase: "phase1", epic: "CI/CD", title: "Write integration tests", status: "backlog", priority: "medium", notes: "Run full pipeline on fixture dataset. Assert mart output is correct." },
   { id: "s23", phase: "phase1", epic: "CI/CD", title: "Set up GitHub Actions CI", status: "backlog", priority: "high", notes: ".github/workflows/ci.yml. On every PR: run pytest, run dbt test. Fail if tests fail." },
   { id: "s26", phase: "phase1", epic: "CI/CD", title: "Write Makefile", status: "backlog", priority: "low", notes: "make ingest, make transform, make test, make report." },

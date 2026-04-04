@@ -38,8 +38,8 @@ Built for one user. Designed to grow.
 | s12 | Set up local PostgreSQL + schemas | ✅ Done |
 | s13 | Create pipeline_state + pipeline_run_log tables | ✅ Done |
 | s03 | Enable Google Sheets API + service account | ✅ Done |
-| s04 | Write extract.py for blood_tests_bulk | ✅ Done |
-| s05 | Write extract.py for menoscale tab | 🔲 Next |
+| s04 | Write extract_blood_tests.py for blood_tests_bulk | ✅ Done |
+| s05 | Write extract_menoscale.py for menoscale tab | 🔲 Next |
 
 ---
 
@@ -111,34 +111,35 @@ Google Sheets API  →  Python ingestion  →  S3 (Bronze)
 vitalStats/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml              # Run tests on every PR
-│       └── pipeline.yml        # Scheduled data pipeline
+│       ├── ci.yml                  # Run tests on every PR
+│       └── pipeline.yml            # Scheduled data pipeline
 ├── ingestion/
 │   ├── google_sheets/
-│   │   ├── extract.py          # Google Sheets API ingestion
+│   │   ├── extract_blood_tests.py  # Google Sheets API ingestion
+│   │   ├── extract_menoscale.py    # Google Sheets API ingestion
 │   │   └── tests/
 │   ├── config/
-│   │   └── known_values.py     # Registry of expected analytes, sites, test types
+│   │   └── known_values.py         # Registry of expected analytes, sites, test types
 │   ├── utils/
-│   │   └── result_parser.py    # Parse "< 0.6", "negative", "48" etc.
-│   ├── fitbit/                 # Phase 4
-│   └── pdf_parser/             # Phase 4
+│   │   └── result_parser.py        # Parse "< 0.6", "negative", "48" etc.
+│   ├── fitbit/                     # Phase 4
+│   └── pdf_parser/                 # Phase 4
 ├── dbt/
 │   ├── models/
-│   │   ├── staging/            # stg_blood_tests, stg_menoscale
-│   │   ├── intermediate/       # int_blood_tests_normalised
-│   │   └── marts/              # mart_blood_trends, mart_health_timeline, mart_ml_features
+│   │   ├── staging/                # stg_blood_tests, stg_menoscale
+│   │   ├── intermediate/           # int_blood_tests_normalised
+│   │   └── marts/                  # mart_blood_trends, mart_health_timeline, mart_ml_features
 │   └── tests/
 ├── ml/
-│   ├── anomaly_detection/      # Phase 3
-│   ├── trend_analysis/         # Phase 3
-│   └── llm_insights/           # Phase 3
+│   ├── anomaly_detection/          # Phase 3
+│   ├── trend_analysis/             # Phase 3
+│   └── llm_insights/               # Phase 3
 ├── infrastructure/
-│   └── terraform/              # Phase 2
+│   └── terraform/                  # Phase 2
 ├── notebooks/
 │   └── eda/
-├── app/                        # Phase 5
-├── docker/                     # Phase 2
+├── app/                            # Phase 5
+├── docker/                         # Phase 2
 ├── docs/
 │   ├── database-schema.md
 │   ├── blood-tests-schema.md
@@ -406,7 +407,8 @@ brew services start postgresql@14
 ### 3. Run the ingestion pipeline
 ```bash
 cd /Users/anca/vitalStats
-uv run python -m ingestion.google_sheets.extract
+uv run python -m ingestion.google_sheets.extract_blood_tests
+uv run python -m ingestion.google_sheets.extract_menoscale
 ```
 
 ### 4. Check the output

@@ -5,7 +5,7 @@ Reads from Google Sheets, validates, deduplicates, writes raw JSON to disk,
 loads into raw.blood_tests_raw, and updates pipeline state.
 
 Run with:
-    uv run python -m ingestion.google_sheets.extract
+    uv run python -m ingestion.google_sheets.extract_blood_tests
 """
 
 import json

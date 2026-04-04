@@ -2,7 +2,8 @@
 Thin wrapper around the Google Sheets API v4.
 
 Responsible only for authentication and fetching raw tab data.
-All parsing, validation, and loading is handled by extract.py.
+All parsing, validation, and loading is handled by 
+extract_blood_tests.py and extract_menoscale.py.
 """
 
 import json
