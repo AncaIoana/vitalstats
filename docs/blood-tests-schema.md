@@ -319,7 +319,7 @@ Maintained in `ingestion/config/known_values.py`. This is the canonical list of 
 
 ## Ingestion Script Specification
 
-**File:** `ingestion/google_sheets/extract.py`
+**File:** `ingestion/google_sheets/extract_blood_tests.py`
 
 **Inputs:**
 - Google Sheets API credentials (service account JSON, via env var `GOOGLE_SHEETS_CREDENTIALS`)

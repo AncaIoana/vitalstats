@@ -52,7 +52,8 @@ vitalStats/
 │       └── pipeline.yml        # Scheduled data pipeline run
 ├── ingestion/
 │   ├── google_sheets/
-│   │   ├── extract.py
+│   │   ├── extract_blood_tests.py
+│   │   ├── extract_menoscale.py
 │   │   └── tests/
 │   ├── fitbit/                 # Phase 4
 │   └── pdf_parser/             # Phase 4
@@ -97,7 +98,7 @@ A Python script that reads your blood test Google Sheet, stores the raw data, tr
 1. Create GitHub repo, set up branch protection, write a `README.md`
 2. Install uv, run `uv python pin 3.11`, `uv init` — commit `pyproject.toml` and `uv.lock` before any other code
 3. Enable Google Sheets API; create a service account; store credentials in `.env`
-4. Write `ingestion/google_sheets/extract.py`:
+4. Write `ingestion/google_sheets/extract_blood_tests.py`:
    - Reads your blood test sheet via the API
    - Validates the data (expected columns, date formats, numeric ranges)
    - Writes raw JSON to a local `/data/raw/` folder (S3 comes in Phase 2)
