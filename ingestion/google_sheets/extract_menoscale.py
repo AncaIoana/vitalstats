@@ -1,27 +1,22 @@
 """
-Blood tests ingestion script — blood_tests_bulk tab.
+Menoscale ingestion script — menoscale tab.
 
 Reads from Google Sheets, validates, deduplicates, writes raw JSON to disk,
-loads into raw.blood_tests_raw, and updates pipeline state.
+loads into raw.menoscale_raw, and updates pipeline state.
 
 Run with:
-    uv run python -m ingestion.google_sheets.extract_blood_tests
+    uv run python -m ingestion.google_sheets.extract_menoscale
 """
 
-import json
 import logging
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-from ingestion.config.known_values import (
-    EXPECTED_COLUMNS_BLOOD_TESTS,
-    KNOWN_COLLECTION_SITES,
-    KNOWN_TEST_TYPES,
-)
+from ingestion.config.known_values import EXPECTED_COLUMNS_MENOSCALE
 from ingestion.google_sheets.extract_utils import (
     get_db_connection,
     start_run,
@@ -42,56 +37,68 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-SOURCE = "blood_tests_bulk"                 # identifies this pipeline in the DB
-RAW_DIR = Path("data/raw/blood_tests")      # local archive directory
-RAW_OUTPUT_PATH = "blood_tests_bulk.json"   # where to write raw JSON archive
-RAW_TABLE = "raw.blood_tests_raw"           # where to insert raw rows in the DB
-
-# ── Side-effect helpers ───────────────────────────────────────────────────────
+SOURCE = "menoscale"                    # identifies this pipeline in the DB
+RAW_DIR = Path("data/raw/menoscale")    # local archive directory
+RAW_OUTPUT_PATH = "menoscale.json"      # where to write raw JSON archive
+RAW_TABLE = "raw.menoscale_raw"         # where to insert raw rows in the DB
 
 
-def _log_unknown_value(
-    conn,
-    run_id: str,
-    field: str,
-    raw_value: str,
-    example_row: dict,
-    risk_level: str,
-) -> None:
+# ── Validation and parsing helpers ────────────────────────────────────────────────────────
+
+
+def _parse_menoscale_date(raw: str) -> date:
     """
-    Write an unrecognised value to silver.stg_unknown_values for manual review.
-    """
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO silver.stg_unknown_values
-                (run_id, source, field, raw_value, example_row, risk_level)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            """,
-            (
-                run_id,
-                SOURCE,
-                field,
-                raw_value,
-                json.dumps(example_row, default=str),
-                risk_level,
-            ),
-        )
+    Parse a menoscale date string that may use one of two formats:
+        "6-Sep-2024"  →  hyphen-separated
+        "16 Apr 2025" →  space-separated
 
+    We also handle full month names just in case ("April" instead of "Apr").
+
+    datetime.strptime(string, format) tries to parse `string` using `format`.
+    It raises ValueError if the string doesn't match — so we try each format
+    in a loop and move on if it fails.
+    """
+    raw = raw.strip()
+    for fmt in ("%d-%b-%Y", "%d %b %Y", "%d-%B-%Y", "%d %B %Y"):
+        try:
+            return datetime.strptime(raw, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"Cannot parse menoscale date: '{raw}'")
+
+
+def _validate_score(raw_score: str) -> int | None:
+    """
+    Parse and validate a raw score string.
+    
+    Return an int if valid, or None if invalid. Validation rules:
+    - If it can't be converted → return None  (treat as soft failure)
+    - If the int is outside 0–100 → return None
+    - Otherwise → return the int
+    """
+    try:
+        raw = raw_score.strip()
+        score = int(raw)
+        if not (0 <= score <= 100):
+            score = None
+    except ValueError:
+        score = None
+        
+    return score
 
 
 # ── Main orchestrator ─────────────────────────────────────────────────────────
 
 def run() -> None:
     """
-    Full ingestion flow for blood_tests_bulk:
+    Full ingestion flow for menoscale:
 
         1. Fetch rows from Google Sheets
         2a. Validate columns present (hard failure → abort)
         2b. Validate row count not dropped (hard failure → abort)
         3. Hash rows, detect unknowns, split new vs duplicate
         4. Write raw JSON archive to disk
-        5. Insert new rows into raw.blood_tests_raw (single transaction)
+        5. Insert new rows into raw.menoscale_raw (single transaction)
         6. Finalise pipeline_run_log and pipeline_state
     """
     load_dotenv()
@@ -105,17 +112,16 @@ def run() -> None:
     # to clean up. Once we have a DB connection, we use fail_run instead.
 
     conn = get_db_connection()
-    run_id = start_run(conn, SOURCE)
+    run_id = start_run(conn, source=SOURCE)
     log.info("Run started. run_id=%s source=%s", run_id, SOURCE)
 
     skipped_detail: list[dict] = []  # accumulates warnings for pipeline_run_log
-    has_unknown_site = False          # flips to True if any unknown site appears
 
     try:
         # ── 1. Fetch ──────────────────────────────────────────────────────────
         log.info("Fetching '%s' from sheet %s", SOURCE, sheet_id)
         try:
-            rows = fetch_tab(sheet_id, "blood_tests_bulk")
+            rows = fetch_tab(sheet_id, "menoscale")
         except Exception as e:
             import traceback as tb
             msg = f"Failed to fetch from Google Sheets: {e}"
@@ -126,7 +132,7 @@ def run() -> None:
         log.info("Fetched %d non-empty rows", len(rows))
 
         # ── 2a. Validate columns ──────────────────────────────────────────────
-        missing = validate_columns(rows, expected_columns=EXPECTED_COLUMNS_BLOOD_TESTS)
+        missing = validate_columns(rows, expected_columns=EXPECTED_COLUMNS_MENOSCALE)
         if missing:
             msg = f"Missing expected columns: {missing}. Aborting."
             log.error(msg)
@@ -141,67 +147,39 @@ def run() -> None:
                 f"got {len(rows)}. Rows may have been deleted from source."
             )
             log.error(msg)
-            fail_run(conn, run_id, source=SOURCE, message=msg)
+            fail_run(conn, run_id, msg)
             return
 
-        # ── 3. Hash rows, detect unknowns, split new vs duplicate ─────────────
+        # ── 3. Hash rows, validate, split new vs duplicate ────────────────────
         existing_hashes = get_existing_hashes(conn, raw_table=RAW_TABLE)
         new_rows: list[dict] = []
 
         for row in rows:
             row_hash = hash_row(row)
-
-            # Missing test type → soft failure, skip row
-            test_type = row.get("Test Type")
-            if not test_type or not test_type.strip():
+            
+            # Parse the date
+            try:
+                _parse_menoscale_date(row.get("Date", ""))
+            except ValueError:
                 skipped_detail.append({
-                    "type": "missing_field",
-                    "field": "Test Type",
+                    "type": "unparseable_date",
+                    "field": "Date",
                     "row": {k: str(v) for k, v in row.items()},
                 })
-                log.warning("Skipping row with missing Test Type: %s", row.get("Analyte"))
+                log.warning("Skipping row with unparseable date: %s", row.get("Date"))
                 continue
-
-            test_type = test_type.strip()
-
-            # Unknown test type → hard failure, abort
-            if test_type not in KNOWN_TEST_TYPES:
-                msg = f"Unknown test type: '{test_type}'. Aborting."
-                log.error(msg)
-                fail_run(conn, run_id, source=SOURCE, message=msg)
-                return
-
-            # Missing collection → soft failure, skip row
-            collection = row.get("Collection")
-            if not collection or not collection.strip():
+            
+            # Validate the score
+            raw_score = row.get("Score (out of 100)")
+            score = _validate_score(raw_score or "")
+            if score is None:
                 skipped_detail.append({
-                    "type": "missing_field",
-                    "field": "Collection",
+                    "type": "invalid_score",
+                    "field": "Score (out of 100)",
                     "row": {k: str(v) for k, v in row.items()},
                 })
-                log.warning("Skipping row with missing Collection: %s", row.get("Analyte"))
+                log.warning("Skipping row with invalid score: %s", raw_score)
                 continue
-
-            collection = collection.strip()
-
-            # Unknown collection site → warn, continue, mark run partial
-            if collection not in KNOWN_COLLECTION_SITES:
-                log.warning("Unknown collection site: '%s'", collection)
-                _log_unknown_value(
-                    conn,
-                    run_id,
-                    field="Collection",
-                    raw_value=collection,
-                    example_row=row,
-                    risk_level="high",
-                )
-                skipped_detail.append({
-                    "type": "unknown_collection_site",
-                    "value": collection,
-                    "row": {k: str(v) for k, v in row.items()},
-                })
-                has_unknown_site = True
-                conn.commit()  # commit the stg_unknown_values insert now
 
             # Skip rows already in the DB (hash-based dedup)
             if row_hash in existing_hashes:
@@ -224,32 +202,23 @@ def run() -> None:
             for row in new_rows:
                 row_hash = row.pop("_hash")
                 cur.execute(
-                    f"""
-                    INSERT INTO {RAW_TABLE} (
-                        source_file, row_hash,
-                        date_raw, test_type_raw, analyte_raw,
-                        result_raw, unit_raw, reference_interval_raw,
-                        collection_raw, notes_raw
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    INSERT INTO raw.menoscale_raw (
+                        source_file, row_hash, date_raw, score_raw
+                    ) VALUES (%s, %s, %s, %s)
                     """,
                     (
                         str(out_path),
                         row_hash,
                         row.get("Date"),
-                        row.get("Test Type"),
-                        row.get("Analyte"),
-                        row.get("Result"),
-                        row.get("Unit"),
-                        row.get("Reference Interval"),
-                        row.get("Collection"),
-                        row.get("Notes"),
+                        row.get("Score (out of 100)"),
                     ),
                 )
         conn.commit()
-        log.info("Inserted %d rows into %s", len(new_rows), RAW_TABLE)
+        log.info("Inserted %d rows into raw.menoscale_raw", len(new_rows))
 
         # ── 6. Finalise pipeline state ────────────────────────────────────────
-        final_status = "partial" if has_unknown_site else "success"
+        final_status = "partial" if skipped_detail else "success"
         finish_run(
             conn,
             run_id,

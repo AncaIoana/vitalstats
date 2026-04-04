@@ -59,7 +59,7 @@ KNOWN_COLLECTION_SITES: dict[str, dict] = {
 }
 
 # Columns we expect to find in blood_tests_bulk.
-EXPECTED_COLUMNS: list[str] = [
+EXPECTED_COLUMNS_BLOOD_TESTS: list[str] = [
     "Date",
     "Test Type",
     "Analyte",
@@ -67,5 +67,11 @@ EXPECTED_COLUMNS: list[str] = [
     "Unit",
     "Reference Interval",
     "Collection",
-    "Notes", 
+    "Notes",
+]
+
+# Columns we expect to find in menoscale.
+EXPECTED_COLUMNS_MENOSCALE: list[str] = [
+    "Date",
+    "Score (out of 100)",
 ]

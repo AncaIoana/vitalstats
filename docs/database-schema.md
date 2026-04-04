@@ -64,6 +64,22 @@ CREATE TABLE raw.blood_tests_raw (
 
 ---
 
+### `raw.menoscale_raw`
+Direct load from CSV. No transformations. Preserves source exactly.
+
+```sql
+CREATE TABLE raw.menoscale_raw (
+    id                   SERIAL PRIMARY KEY,
+    ingested_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+    source_file          TEXT NOT NULL,                     -- filename or S3 key
+    row_hash             TEXT NOT NULL,                     -- SHA256 of all fields for dedup
+    date_raw             TEXT,                              -- "6-Apr-2023" — as-is from source
+    score_raw            TEXT
+);
+```
+
+---
+
 ### `silver.stg_blood_tests`
 Cleaned and typed. One row per analyte per date per collection site.
 

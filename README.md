@@ -39,7 +39,7 @@ Built for one user. Designed to grow.
 | s13 | Create pipeline_state + pipeline_run_log tables | ✅ Done |
 | s03 | Enable Google Sheets API + service account | ✅ Done |
 | s04 | Write extract_blood_tests.py for blood_tests_bulk | ✅ Done |
-| s05 | Write extract_menoscale.py for menoscale tab | 🔲 Next |
+| s05 | Write extract_menoscale.py for menoscale tab | ✅ Done |
 
 ---
 
@@ -117,7 +117,8 @@ vitalStats/
 │   ├── google_sheets/
 │   │   ├── extract_blood_tests.py  # Google Sheets API ingestion
 │   │   ├── extract_menoscale.py    # Google Sheets API ingestion
-│   │   └── tests/
+│   │   ├── extract_utils.py    # Google Sheets API ingestion
+│   │   └── sheets_client.py
 │   ├── config/
 │   │   └── known_values.py         # Registry of expected analytes, sites, test types
 │   ├── utils/
@@ -266,11 +267,14 @@ uv run dbt debug  # verify connection
 ### 6. Run the pipeline
 
 ```bash
-make ingest      # fetch from Google Sheets → raw tables
-make transform   # run dbt models → silver + gold
-make test        # run pytest + dbt tests
-make report      # generate plain-text health summary
+# Ingest blood tests
+uv run python -m ingestion.google_sheets.extract_blood_tests
+
+# Ingest menoscale scores
+uv run python -m ingestion.google_sheets.extract_menoscale
 ```
+
+> A `Makefile` with shorthand commands (`make ingest`, `make test` etc.) is planned for a later story.
 
 ### 7. Kanban board
 
@@ -388,7 +392,7 @@ git checkout -b feature/your-story-name
 
 ---
 
-## Adding new blood test results
+## Adding new blood test / menoscale results
 
 When you have new test results to add to the Google Sheet and want them ingested:
 
@@ -450,9 +454,10 @@ uv sync
 Run all tests:
 ```bash
 uv run pytest
+uv run pytest tests/unit/ -v
 ```
 
-Run with coverage:
+Run with coverage (shows percentage):
 ```bash
 uv run pytest --cov=ingestion
 ```
