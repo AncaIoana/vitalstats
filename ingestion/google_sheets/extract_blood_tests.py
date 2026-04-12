@@ -79,9 +79,7 @@ def _log_unknown_value(
         )
 
 
-
 # ── Main orchestrator ─────────────────────────────────────────────────────────
-
 def run() -> None:
     """
     Full ingestion flow for blood_tests_bulk:

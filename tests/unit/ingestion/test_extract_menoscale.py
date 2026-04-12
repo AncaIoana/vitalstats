@@ -2,6 +2,7 @@ import pytest
 from datetime import date
 from ingestion.google_sheets.extract_menoscale import _parse_menoscale_date, _validate_score
 
+
 # test _parse_menoscale_date ──────────────────────────────────────────
 def test_parse_hyphen_format():
     assert _parse_menoscale_date("6-Sep-2024") == date(2024, 9, 6)
@@ -18,6 +19,7 @@ def test_parse_strips_whitespace():
 def test_parse_invalid_raises():
     with pytest.raises(ValueError):
         _parse_menoscale_date("not-a-date")
+
 
 # test _validate_score ────────────────────────────────────────────────────
 def test_validate_score_valid():
