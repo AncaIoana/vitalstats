@@ -40,6 +40,7 @@ Built for one user. Designed to grow.
 | s03 | Enable Google Sheets API + service account | ✅ Done |
 | s04 | Write extract_blood_tests.py for blood_tests_bulk | ✅ Done |
 | s05 | Write extract_menoscale.py for menoscale tab | ✅ Done |
+| s07 | Build result parser (parse_result.py) | ✅ Done |
 
 ---
 

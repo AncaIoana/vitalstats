@@ -76,23 +76,33 @@ The `Result` column is a string that can contain:
 
 **Python parsing function** (to be implemented in `ingestion/utils/result_parser.py`):
 ```python
+from dataclasses import dataclass
 import re
 
-def parse_result(raw: str) -> dict:
+@dataclass(frozen=True)
+class ParsedResult:
+    is_numeric: bool
+    numeric: float | None = None
+    qualifier: str | None = None
+    text: str | None = None
+
+_LT_PATTERN = re.compile(r'^[<＜]\s*(\d+\.?\d*)$')
+_GT_PATTERN = re.compile(r'^[>＞]\s*(\d+\.?\d*)$')
+
+def parse_result(raw: str) -> ParsedResult:
     raw = raw.strip()
-    # Less-than
-    m = re.match(r'^[<＜]\s*(\d+\.?\d*)$', raw)
+    m = _LT_PATTERN.match(raw)
     if m:
-        return {"numeric": float(m.group(1)), "qualifier": "lt", "is_numeric": True}
-    # Greater-than
-    m = re.match(r'^[>＞]\s*(\d+\.?\d*)$', raw)
+        return ParsedResult(is_numeric=True, numeric=float(m.group(1)), qualifier="lt")
+    m = _GT_PATTERN.match(raw)
     if m:
-        return {"numeric": float(m.group(1)), "qualifier": "gt", "is_numeric": True}
-    # Plain numeric
+        return ParsedResult(is_numeric=True, numeric=float(m.group(1)), qualifier="gt")
     try:
-        return {"numeric": float(raw), "qualifier": None, "is_numeric": True}
+        return ParsedResult(is_numeric=True, numeric=float(raw))
     except ValueError:
-        return {"numeric": None, "qualifier": None, "is_numeric": False, "text": raw.lower()}
+        pass
+    normalised = "_".join(raw.lower().split())
+    return ParsedResult(is_numeric=False, text=normalised)
 ```
 
 ---
