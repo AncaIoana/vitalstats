@@ -109,18 +109,31 @@ def parse_result(raw: str) -> ParsedResult:
 
 ### Reference Interval — Parsing Rules
 
-Highly inconsistent. Applied in dbt staging model.
+Applied in the ingestion parser (`ingestion/utils/ref_interval_parser.py`).
+Canonical reference ranges used by ML and anomaly detection live in
+`gold.mart_reference_ranges` — not in this parsed output (ADR-004).
 
-| Pattern | Example | `ref_low` | `ref_high` | `ref_type` |
-|---|---|---|---|---|
-| Range | `"35-50"` | 35 | 50 | `range` |
-| Range with spaces | `"2.20 - 2.60"` | 2.20 | 2.60 | `range` |
-| Less-than | `"<35"`, `"< 20"` | NULL | 35 | `lt` |
-| Greater-than | `">1.99 %"` | 1.99 | NULL | `gt` |
-| N/A | `"N/A"` | NULL | NULL | `categorical` |
-| Free text / complex | `"0 (no AKI) to 3 (severe AKI)"` | NULL | NULL | `narrative` |
-| Adults pattern | `"Adults: <1.2"` | NULL | 1.2 | `lt` |
-| Empty | `""` | NULL | NULL | `unknown` |
+| Pattern | Example | `ref_low` | `ref_high` | `ref_type` | `note` |
+|---|---|---|---|---|---|
+| Empty | `""` | None | None | `unknown` | None |
+| Not applicable | `"N/A"` | None | None | `categorical` | None |
+| Simple range | `"35-50"` | 35.0 | 50.0 | `range` | None |
+| Range with spaces | `"2.20 - 2.60"` | 2.20 | 2.60 | `range` | None |
+| Range with unit glued | `"15.00-150.00ug/L"` | 15.0 | 150.0 | `range` | None |
+| Less-than | `"<35"`, `"< 20"` | None | 35.0 | `lt` | None |
+| Greater-than | `">1.99 %"` | 1.99 | None | `gt` | None |
+| Known prefix + range | `"Adults: <1.2"` | None | 1.2 | `lt` | `"Reference range applies to: Adults"` |
+| Gender/age/condition split | `"49-90 for women60-110 for men"` | None | None | `narrative` | raw string |
+| Ordinal severity scale | `"0 (no AKI) to 3 (severe AKI)"` | None | None | `narrative` | raw string |
+| Time-of-day split | `"6-10 a.m.: 133-537 4-8 p.m.: 68.2-327"` | None | None | `narrative` | raw string |
+
+**Known qualifying prefixes** (case-insensitive, stripped before parsing):
+`Adults:`, `Female:`, `Male:`, `Children:`, `Women:`, `Men:`
+
+**Narrative detection triggers** (any one → `ref_type="narrative"`):
+- More than one numeric range found in the string
+- Contains ` for `, `Men`, `Women`, `Male`, `Female`, `Pregnancy`, `a.m.`, `p.m.`
+- Contains `:` followed by a non-numeric word (ordinal label pattern)
 
 ---
 

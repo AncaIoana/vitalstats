@@ -15,7 +15,7 @@ _LT_PATTERN = re.compile(r'^[<＜]\s*(\d+\.?\d*)$')
 _GT_PATTERN = re.compile(r'^[>＞]\s*(\d+\.?\d*)$')
 
 
-def parse_result(raw: str) -> ParsedResult:
+def parse_result(raw_result: str) -> ParsedResult:
     """Parse a raw result string into a structured ParsedResult.
 
     Handles five cases:
@@ -25,7 +25,7 @@ def parse_result(raw: str) -> ParsedResult:
     - Known categorical: "negative", "Positive" → text="negative"
     - Free text: "Discussed with patient"        → text="discussed_with_patient"
     """
-    raw = raw.strip()
+    raw = raw_result.strip()
 
     # Less-than qualifier
     m = _LT_PATTERN.match(raw)
