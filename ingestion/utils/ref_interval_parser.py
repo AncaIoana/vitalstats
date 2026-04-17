@@ -11,6 +11,7 @@ class ParsedRefInterval:
 
 
 _KNOWN_PREFIXES = ["adults:", "female:", "male:", "children:", "women:", "men:"]
+_NARRATIVE_TRIGGERS = [" for ", "Men", "Women", "Male", "Female", "Pregnancy", "a.m.", "p.m."]
 
 # Matches "35-50", "2.20 - 2.60", "15.00-150.00ug/L"
 _RANGE_PATTERN = re.compile(r'^(\d+\.?\d*)\s*-\s*(\d+\.?\d*)')
@@ -52,6 +53,11 @@ def parse_ref_interval(raw_ref_interval: str) -> ParsedRefInterval:
             break
 
     prefix_note = f"Reference range applies to: {qualifier}" if qualifier else None
+
+    for trigger in _NARRATIVE_TRIGGERS:
+        if trigger.lower() in raw_ref_interval.lower():
+            return ParsedRefInterval(ref_type="narrative",
+                                     note=original_raw_ref_interval)
 
     m = _RANGE_PATTERN.match(raw_ref_interval)
     if m:

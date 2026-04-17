@@ -123,10 +123,17 @@ Canonical reference ranges used by ML and anomaly detection live in
 | Less-than | `"<35"`, `"< 20"` | None | 35.0 | `lt` | None |
 | Greater-than | `">1.99 %"` | 1.99 | None | `gt` | None |
 | Known prefix + range | `"Adults: <1.2"` | None | 1.2 | `lt` | `"Reference range applies to: Adults"` |
-| Anything else | `"49-90 for women60-110 for men"` | None | None | `narrative` | raw string |
+| Gender/age/condition split | `"49-90 for women60-110 for men"` | None | None | `narrative` | raw string |
+| Ordinal severity scale | `"0 (no AKI) to 3 (severe AKI)"` | None | None | `narrative` | raw string |
+| Time-of-day split | `"6-10 a.m.: 133-537 4-8 p.m.: 68.2-327"` | None | None | `narrative` | raw string |
 
 **Known qualifying prefixes** (case-insensitive, stripped before parsing):
 `Adults:`, `Female:`, `Male:`, `Children:`, `Women:`, `Men:`
+
+**Narrative detection triggers** (any one → `ref_type="narrative"`):
+- More than one numeric range found in the string
+- Contains ` for `, `Men`, `Women`, `Male`, `Female`, `Pregnancy`, `a.m.`, `p.m.`
+- Contains `:` followed by a non-numeric word (ordinal label pattern)
 
 ---
 
