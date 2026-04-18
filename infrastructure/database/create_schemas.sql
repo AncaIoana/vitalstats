@@ -23,6 +23,15 @@ CREATE TABLE IF NOT EXISTS raw.blood_tests_raw (
     notes_raw               TEXT
 );
 
+CREATE TABLE IF NOT EXISTS raw.menoscale_raw (                                                           
+    id                   SERIAL PRIMARY KEY,
+    ingested_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+    source_file          TEXT NOT NULL,                     
+    row_hash             TEXT NOT NULL,                     
+    date_raw             TEXT,                              
+    score_raw            TEXT
+);
+
 CREATE TABLE IF NOT EXISTS raw.pipeline_state (
     source                  TEXT PRIMARY KEY,
     last_run_at             TIMESTAMP,
