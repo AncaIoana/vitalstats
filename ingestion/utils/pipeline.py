@@ -1,6 +1,8 @@
 """
-Utility functions for Google SheetsM ingestion script.
+Shared pipeline utilities for all vitalStats ingestion scripts.
 
+Covers: DB connection, run logging, hash-based deduplication,
+column validation, and raw JSON archiving.
 """
 
 import json

@@ -22,7 +22,7 @@ from ingestion.config.known_values import (
     KNOWN_COLLECTION_SITES,
     KNOWN_TEST_TYPES,
 )
-from ingestion.google_sheets.extract_utils import (
+from ingestion.utils.pipeline import (
     get_db_connection,
     start_run,
     finish_run,
