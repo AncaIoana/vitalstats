@@ -2,7 +2,7 @@
 Unit tests for shared ingestion utilities in extract_utils.py.
 """
 
-from ingestion.google_sheets.extract_utils import validate_columns
+from ingestion.utils.pipeline import validate_columns
 
 
 def test_validate_columns_all_present():
