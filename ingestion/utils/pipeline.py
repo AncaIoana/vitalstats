@@ -162,6 +162,7 @@ def get_existing_hashes(conn, raw_table: str) -> set[str]:
     We load these into a Python set so that checking whether a hash
     already exists is O(1) — a set lookup is instant regardless of how
     many hashes are stored.
+    note: fetchall() returns a list of tuples — each row is (hash_string,)
     """
     with conn.cursor() as cur:
         cur.execute(f"SELECT row_hash FROM {raw_table}")

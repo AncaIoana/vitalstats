@@ -39,6 +39,7 @@
 5. **Git guidance.** Tell the user when to push from `dev` to `main`.
 6. **Claude project sync.** If anything needs adding to the Claude project memory, output the exact text to paste.
 7. **Tutoring mode.** Act as a tutor — explain what each piece of code does. Balance giving code vs. guiding the user to write it themselves. Reference prior patterns ("do what you did in X") when possible, then review.
+8. **Project structure.** After each file creation or when starting a new ticket, review the overall project structure to consider whether files and folders need to be moved, merged, renamed or any other practical and logical restructuring. 
 
 ## dbt (`dbt_project/`)
 
