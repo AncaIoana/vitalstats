@@ -287,14 +287,14 @@ brew update
 brew install node@22
 ```
 
-1. Force-link that version so it is the active "node"
+2. Force-link that version so it is the active "node"
 
 ```
 brew unlink node 2>/dev/null || true
 brew link --overwrite --force node@22
 ```
 
-1. Put node@22 bin first in PATH (choose ONE line)
+3. Put node@22 bin first in PATH (choose ONE line)
 
 Apple Silicon:
 
@@ -308,14 +308,14 @@ Intel Mac:
 echo 'export PATH="/usr/local/opt/node@22/bin:$PATH"' >> ~/.zshrc
 ```
 
-1. Reload shell and clear command cache
+4. Reload shell and clear command cache
 
 ```
 source ~/.zshrc
 hash -r
 ```
 
-1. Verify
+5. Verify
 
 ```
 type -a node
@@ -323,12 +323,10 @@ node -v
 npm -v
 ```
 
-1. Run
+6. Run
 
 ```
-cd /Users/Poirot/vitalStats
-npm create vite@latest vs-board -- --template react
-cd vs-board
+cd /Users/Poirot/vitalStats/vs-board
 npm install
 npm run dev
 ```
@@ -364,6 +362,7 @@ You should see `started` next to your version.
 ### 2. Open the kanban board
 ```bash
 cd /Users/anca/vitalStats/vs-board
+npm install   # only needed first time or after pulling new dependencies
 npm run dev
 ```
 

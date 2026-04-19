@@ -17,7 +17,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from ingestion.config.known_values import EXPECTED_COLUMNS_MENOSCALE
-from ingestion.google_sheets.extract_utils import (
+from ingestion.utils.pipeline import (
     get_db_connection,
     start_run,
     finish_run,
