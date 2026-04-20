@@ -42,6 +42,9 @@ Built for one user. Designed to grow.
 | s05 | Write extract_menoscale.py for menoscale tab | ✅ Done |
 | s07 | Build result parser (parse_result.py) | ✅ Done |
 | s08 | Build reference interval parser | ✅ Done |
+| s06 | Implement hash-based deduplication | ✅ Done |
+| s09 | Implement known values registry | ✅ Done |
+| s10 | Implement unknown value detection + stg_unknown_values | ✅ Done |
 
 ---
 
