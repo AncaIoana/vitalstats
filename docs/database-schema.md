@@ -242,6 +242,7 @@ One row per vaccine administration. Tracked person rows only — partner rows fi
 CREATE TABLE silver.stg_vaccines (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vaccine_type_dose    TEXT NOT NULL,                     -- "HPV (1st dose)", "Covid-19", "DTP (...)"
+    dose_number          INTEGER,                           -- parsed from "(1st dose)" → 1. NULL if no dose in name
     vaccine_slug         TEXT NOT NULL,                     -- "flu_influenza", "covid_19", "dtp" etc.
     date_administered    DATE NOT NULL,
     immunity_duration_text TEXT,                            -- "1 year", "Lifelong", "Part of 3-dose course"
@@ -271,6 +272,7 @@ CREATE INDEX idx_stg_vax_most_recent ON silver.stg_vaccines(vaccine_slug, is_mos
 - Unparseable booster_due (e.g. `"See 3rd dose date"`) → both NULL, value stored in notes
 - Parse `is_most_recent`: `"Yes"` → TRUE, `"No"` / NULL → FALSE
 - Parse `expiration_date`: `"Dec-2027"` → `2027-12-01` (1st of month convention)
+- Parse `dose_number` from `vaccine_type_dose`: regex `(\d+)(?:st|nd|rd|th)\s+dose` → integer. NULL if no dose pattern found (e.g. "Covid-19", "Flu (Influenza)")
 - `vaccine_product_name` is the commercial product (e.g. "Engerix B"), distinct from `vaccine_type_dose` (the type/course, e.g. "Hepatitis B (1st dose)")
 
 ---

@@ -132,6 +132,30 @@ def parse_booster_due(raw):
     return None, None  # string values -> store in notes instead
 ```
 
+### Dose Number — Parsing Rules
+
+Extracted from `Vaccine Type & Dose` via regex. Represents the dose number in a multi-dose course.
+
+| Raw vaccine type & dose | dose_number |
+|---|---|
+| `"HPV (1st dose)"` | `1` |
+| `"HPV (2nd dose)"` | `2` |
+| `"HPV (3rd dose)"` | `3` |
+| `"Hepatitis B (1st dose)"` | `1` |
+| `"Covid-19"` | `NULL` |
+| `"Flu (Influenza)"` | `NULL` |
+| `"DTP (Diptheria, Tetanus & Polio Combined)"` | `NULL` |
+
+```python
+import re
+
+def parse_dose_number(vaccine_type_dose: str) -> int | None:
+    match = re.search(r'(\d+)(?:st|nd|rd|th)\s+dose', vaccine_type_dose, re.IGNORECASE)
+    return int(match.group(1)) if match else None
+```
+
+---
+
 ### Is Most Recent Column — Parsing Rules
 
 Ingested as a boolean (`is_most_recent`). Used in Gold to filter the "current" vaccine status per vaccine type.
