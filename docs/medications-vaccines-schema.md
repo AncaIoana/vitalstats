@@ -89,10 +89,17 @@ Note: `0.5` means alternating between 1 per day and 0 per day — noted in sourc
 | Column | Raw name | Type in source | Notes |
 |---|---|---|---|
 | Person | `Name` | String | Two people in sheet — **filter to tracked person only** |
-| Date Given | `Date Given` | Excel datetime | Consistent format |
-| Vaccine | `Vaccine Name & Dose` | String | Strip whitespace on ingest |
-| Immunity Duration | `Immunity Duration (Years)` | String | Free text — `"1 year"`, `"Lifelong"`, `"Part of 3-dose course"` |
+| Date Administered | `Date Administered` | Excel datetime | Consistent format |
+| Vaccine Type & Dose | `Vaccine Type & Dose` | String | Strip whitespace on ingest. Type + dose info e.g. "HPV (1st dose)", "Covid-19" |
+| Immunity Duration | `Immunity Duration (Years)` | String | Free text — `"1 year"`, `"Long-term (10+ years, possibly lifelong)"`, `"Part of 3-dose course"` |
 | Booster Due | `Booster Due` | Mixed | Year integer (2028.0), NULL, or string — see below |
+| Is Most Recent | `Is this the most recent record?` | String | `"Yes"` / `"No"` — parsed to boolean. See below |
+| Administration Site | `Administration site` | String | Free text — `"Intramuscular (IM) - right deltoid"`. Nullable (sparse on older records) |
+| Vaccination Location | `Vaccination location` | String | Free text — `"Boots, Manchester"`, `"NHS - Manchester Sportcity Vaccination Centre"`. Nullable |
+| Batch & Lot Number | `Batch and lot number` | String | Free text — `"AHBVD221AB"`. Nullable |
+| Vaccine Name | `Vaccine Name` | String | Product name — `"Engerix B 20 mcg p/f syringe (Hepatitis B)"`, `"VAQTA Adult"`. Free text, nullable. Distinct from Vaccine Type & Dose |
+| Expiration Date | `Expiration date` | String | Month-year format — `"Dec-2027"`. Parsed to DATE as YYYY-MM-01. Nullable |
+| Manufacturer | `Manufacturer` | String | Free text — `"GSK"`. Nullable |
 | Notes | `Notes` | String | Free text |
 
 ### Critical Filtering Rule
@@ -100,7 +107,7 @@ Note: `0.5` means alternating between 1 per day and 0 per day — noted in sourc
 **Only rows belonging to the tracked person are ingested. Partner rows are discarded at the Python ingestion stage before loading into Silver.**
 
 ```python
-vaccines_df = vaccines_df[vaccines_df['Name'].str.strip() == TRACKED_PERSON_NAME]
+vaccines_df = vaccines_df[vaccines_df["Name"].str.strip() == TRACKED_PERSON_NAME]
 ```
 
 `TRACKED_PERSON_NAME` is loaded from an environment variable — never hardcoded in the script.
@@ -122,29 +129,65 @@ def parse_booster_due(raw):
     if isinstance(raw, (int, float)):
         year = int(raw)
         return year, date(year, 1, 1)
-    return None, None  # string values → store in notes instead
+    return None, None  # string values -> store in notes instead
+```
+
+### Is Most Recent Column — Parsing Rules
+
+Ingested as a boolean (`is_most_recent`). Used in Gold to filter the "current" vaccine status per vaccine type.
+
+| Raw value | Parsed |
+|---|---|
+| `"Yes"` | `TRUE` |
+| `"No"` | `FALSE` |
+| NULL / empty | `FALSE` |
+
+> **Future enhancement:** When a new record appears for a vaccine type that already has `is_most_recent = TRUE`, trigger a notification or automation to flag that the source sheet may need updating. Deferred — not in Phase 1b scope.
+
+### Expiration Date Column — Parsing Rules
+
+Source format is month-year only (e.g. `"Dec-2027"`). Parsed to a `DATE` using the 1st of the month as convention.
+
+```python
+from datetime import datetime, date
+
+def parse_expiration_date(raw) -> date | None:
+    if raw is None or str(raw).strip() == "":
+        return None
+    raw = str(raw).strip()
+    for fmt in ("%b-%Y", "%B-%Y"):
+        try:
+            return datetime.strptime(raw, fmt).date()  # e.g. 2027-12-01
+        except ValueError:
+            continue
+    return None  # unparseable — log warning, store NULL
 ```
 
 ### Observed Vaccines (tracked person only)
 
-| Raw vaccine name | Canonical slug |
-|---|---|
-| `Flu (Influenza)` | `flu_influenza` |
-| `Covid-19` | `covid_19` |
-| `DTP (Diptheria, Tetanus & Polio Combined)` | `dtp` |
-| `Typhoid` | `typhoid` |
-| `Hepatitis A (Hep A)` | `hepatitis_a` |
-| `HPV (1st dose)` | `hpv` |
-| `HPV (2nd dose)` | `hpv` |
-| `HPV (3rd dose)` | `hpv` |
+| Raw vaccine type & dose | Canonical slug | Notes |
+|---|---|---|
+| `Flu (Influenza)` | `flu_influenza` | Annual |
+| `Covid-19` | `covid_19` | |
+| `DTP (Diptheria, Tetanus & Polio Combined)` | `dtp` | |
+| `Typhoid` | `typhoid` | |
+| `Hepatitis A` | `hepatitis_a` | Multi-dose course |
+| `Hepatitis B (1st dose)` | `hepatitis_b` | Multi-dose course (3 doses) |
+| `HPV (1st dose)` | `hpv` | Multi-dose course (3 doses) |
+| `HPV (2nd dose)` | `hpv` | |
+| `HPV (3rd dose)` | `hpv` | |
 
 ### Known Data Quality Issues
 
 | Issue | Example | Handling |
 |---|---|---|
-| Multi-dose vaccines | HPV appears as 1st/2nd/3rd dose | All map to same `vaccine_slug = "hpv"` |
-| Old records with superseded boosters | Typhoid with `"there is a more recent record"` | Ingest all; latest record takes precedence in Gold mart |
-| Booster due as string | `"See 3rd dose date"` | Parse to NULL; log in notes field |
+| Multi-dose vaccines | HPV appears as 1st/2nd/3rd dose; Hepatitis B as 1st/2nd/3rd dose | All map to same `vaccine_slug` (e.g. `"hpv"`, `"hepatitis_b"`) |
+| Older records sparse on new columns | Pre-2022 records have no location, batch, manufacturer | All new columns are nullable — ingest as-is |
+| `is_most_recent` may go stale | If sheet isn't updated when new vaccine given | Ingest as-is; Gold mart can cross-check with `max(date_administered)` per slug as validation |
+| Booster due as string | `"See 3rd dose date"`, `"Check booster guidance"` | Parse to NULL; log in notes field |
+| Expiration date month-year only | `"Dec-2027"` | Parse to `YYYY-MM-01` convention |
+| Notes contain multi-dose schedule | `"Dose 2: 8 May 2026, Dose 3: 8 Oct 2026"` | Store as free text; no structured parsing needed |
+| Hepatitis A name change | Old records say `"Hepatitis A (Hep A)"`, newer say `"Hepatitis A"` | Both map to `hepatitis_a` |
 
 ---
 
@@ -171,7 +214,7 @@ All parsers emit structured warnings for field values that are technically valid
 - Medication name fuzzy-matches a known slug but is not an exact match
 
 **Triggers for vaccines:**
-- Date given in the future
+- Date administered in the future
 - Booster due year more than 30 years in the future
 - Vaccine name not in the known vaccines registry
 

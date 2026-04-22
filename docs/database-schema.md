@@ -241,12 +241,19 @@ One row per vaccine administration. Tracked person rows only — partner rows fi
 ```sql
 CREATE TABLE silver.stg_vaccines (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    vaccine_name         TEXT NOT NULL,
+    vaccine_type_dose    TEXT NOT NULL,                     -- "HPV (1st dose)", "Covid-19", "DTP (...)"
     vaccine_slug         TEXT NOT NULL,                     -- "flu_influenza", "covid_19", "dtp" etc.
-    date_administered           DATE NOT NULL,
+    date_administered    DATE NOT NULL,
     immunity_duration_text TEXT,                            -- "1 year", "Lifelong", "Part of 3-dose course"
     booster_due_year     INTEGER,                           -- parsed from 2028.0 → 2028
     booster_due_date     DATE,                              -- derived: YYYY-01-01 from booster_due_year
+    is_most_recent       BOOLEAN NOT NULL DEFAULT FALSE,    -- from "Is this the most recent record?" column
+    administration_site  TEXT,                              -- "Intramuscular (IM) - right deltoid". Nullable
+    vaccination_location TEXT,                              -- "Boots, Manchester", "NHS - ...". Nullable
+    batch_lot_number     TEXT,                              -- "AHBVD221AB". Nullable
+    vaccine_product_name TEXT,                              -- product name: "Engerix B 20 mcg...", "VAQTA Adult". Free text, nullable
+    expiration_date      DATE,                              -- parsed from "Dec-2027" → 2027-12-01. Nullable
+    manufacturer         TEXT,                              -- "GSK". Nullable
     notes                TEXT,
     source_row_hash      TEXT NOT NULL,
     loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
@@ -254,6 +261,7 @@ CREATE TABLE silver.stg_vaccines (
 
 CREATE INDEX idx_stg_vax_slug ON silver.stg_vaccines(vaccine_slug);
 CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_administered);
+CREATE INDEX idx_stg_vax_most_recent ON silver.stg_vaccines(vaccine_slug, is_most_recent);
 ```
 
 **Key transformation logic:**
@@ -261,6 +269,9 @@ CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_administered);
 - Strip trailing spaces: `"Covid-19 "` → `"Covid-19"`
 - Parse booster_due integer: `2028.0` → `booster_due_year = 2028`, `booster_due_date = 2028-01-01`
 - Unparseable booster_due (e.g. `"See 3rd dose date"`) → both NULL, value stored in notes
+- Parse `is_most_recent`: `"Yes"` → TRUE, `"No"` / NULL → FALSE
+- Parse `expiration_date`: `"Dec-2027"` → `2027-12-01` (1st of month convention)
+- `vaccine_product_name` is the commercial product (e.g. "Engerix B"), distinct from `vaccine_type_dose` (the type/course, e.g. "Hepatitis B (1st dose)")
 
 ---
 
