@@ -637,7 +637,7 @@ Add a **validation notification layer** to all ingestion scripts. This runs afte
 *Vaccines:*
 - Booster due year more than 30 years in the future
 - Vaccine name not in the known vaccines registry
-- Date given in the future
+- Date administered in the future
 
 **Implementation:**
 
