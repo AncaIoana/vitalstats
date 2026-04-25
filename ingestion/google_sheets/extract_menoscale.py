@@ -77,7 +77,7 @@ def _validate_score(raw_score: str) -> int | None:
     - Otherwise → return the int
     """
     try:
-        raw = raw_score.strip()
+        raw = str(raw_score).strip()
         score = int(raw)
         if not (0 <= score <= 100):
             score = None
@@ -147,12 +147,14 @@ def run() -> None:
                 f"got {len(rows)}. Rows may have been deleted from source."
             )
             log.error(msg)
-            fail_run(conn, run_id, msg)
+            fail_run(conn, run_id, source=SOURCE, message=msg)
             return
 
         # ── 3. Hash rows, validate, split new vs duplicate ────────────────────
         existing_hashes = get_existing_hashes(conn, raw_table=RAW_TABLE)
         new_rows: list[dict] = []
+        duplicates: int = 0
+        rows_failed: int = 0
 
         for row in rows:
             row_hash = hash_row(row)
@@ -166,6 +168,7 @@ def run() -> None:
                     "field": "Date",
                     "row": {k: str(v) for k, v in row.items()},
                 })
+                rows_failed += 1
                 log.warning("Skipping row with unparseable date: %s", row.get("Date"))
                 continue
             
@@ -178,16 +181,17 @@ def run() -> None:
                     "field": "Score (out of 100)",
                     "row": {k: str(v) for k, v in row.items()},
                 })
+                rows_failed += 1
                 log.warning("Skipping row with invalid score: %s", raw_score)
                 continue
 
             # Skip rows already in the DB (hash-based dedup)
             if row_hash in existing_hashes:
+                duplicates += 1
                 continue
 
             new_rows.append({**row, "_hash": row_hash})
 
-        duplicates = len(rows) - len(new_rows)
         log.info("%d new rows to insert, %d duplicates skipped", len(new_rows), duplicates)
 
         # ── 4. Write raw JSON archive ─────────────────────────────────────────
@@ -227,7 +231,7 @@ def run() -> None:
             rows_fetched=len(rows),
             rows_ingested=len(new_rows),
             rows_skipped=duplicates,
-            rows_failed=0,
+            rows_failed=rows_failed,
             skipped_detail=skipped_detail or None,
         )
         log.info("Run complete. status=%s", final_status)

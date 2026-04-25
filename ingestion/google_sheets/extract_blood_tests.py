@@ -145,6 +145,8 @@ def run() -> None:
         # ── 3. Hash rows, detect unknowns, split new vs duplicate ─────────────
         existing_hashes = get_existing_hashes(conn, raw_table=RAW_TABLE)
         new_rows: list[dict] = []
+        duplicates: int = 0
+        rows_failed: int = 0
 
         for row in rows:
             row_hash = hash_row(row)
@@ -157,6 +159,7 @@ def run() -> None:
                     "field": "Test Type",
                     "row": {k: str(v) for k, v in row.items()},
                 })
+                rows_failed += 1
                 log.warning("Skipping row with missing Test Type: %s", row.get("Analyte"))
                 continue
 
@@ -177,6 +180,7 @@ def run() -> None:
                     "field": "Collection",
                     "row": {k: str(v) for k, v in row.items()},
                 })
+                rows_failed += 1
                 log.warning("Skipping row with missing Collection: %s", row.get("Analyte"))
                 continue
 
@@ -203,11 +207,11 @@ def run() -> None:
 
             # Skip rows already in the DB (hash-based dedup)
             if row_hash in existing_hashes:
+                duplicates += 1
                 continue
 
             new_rows.append({**row, "_hash": row_hash})
 
-        duplicates = len(rows) - len(new_rows)
         log.info("%d new rows to insert, %d duplicates skipped", len(new_rows), duplicates)
 
         # ── 4. Write raw JSON archive ─────────────────────────────────────────
@@ -256,7 +260,7 @@ def run() -> None:
             rows_fetched=len(rows),
             rows_ingested=len(new_rows),
             rows_skipped=duplicates,
-            rows_failed=0,
+            rows_failed=rows_failed,
             skipped_detail=skipped_detail or None,
         )
         log.info("Run complete. status=%s", final_status)
