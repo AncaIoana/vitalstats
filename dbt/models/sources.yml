@@ -1,0 +1,86 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data layer from ingestion pipeline
+    database: vitalstats
+    schema: raw
+    tables:
+      - name: blood_tests_raw
+        description: >
+          Append-only audit log of all blood test rows ingested from Google Sheets.
+          Rows are never updated or deleted. When a source row is edited in the sheet,
+          a new row is inserted with a new hash, preserving the full edit history.
+          Deduplication to the latest version of each logical row happens in the staging layer.
+        columns:
+          - name: id
+            description: >
+              Auto-incrementing physical row identifier. Not a logical unique key —
+              the same blood test may appear more than once with different IDs if
+              the source row was edited and re-ingested.
+            tests:
+              - not_null
+          - name: ingested_at
+            description: Timestamp of when the row was ingested into the database.
+            tests:
+              - not_null
+          - name: source_file
+            description: Name of the source file.
+            tests:
+              - not_null
+          - name: row_hash
+            description: >
+              SHA256 hash of row content for deduplication. Unique per row version —
+              the same version of a row is never inserted twice.
+            tests:
+              - unique
+              - not_null
+          - name: date_raw
+            description: The date when the blood test was taken (e.g., "6-Apr-2023").
+          - name: test_type_raw
+            description: Blood sciences (aka Clinical Pathology) types. These are umbrella terms used for laboratory sections that analyse the samples.
+          - name: analyte_raw
+            description: Analyte name from sheet, representing the specific substances, cells or chemical components being measured within the blood sample.
+          - name: result_raw
+            description: Test result value as it appears in the sheet.
+          - name: unit_raw
+            description: Unit of measurement for the test result as it appears in the sheet.
+          - name: reference_interval_raw
+            description: Reference interval for the test result, if it is parsable.
+          - name: collection_raw
+            description: Collection site (lab name).
+          - name: notes_raw
+            description: Additional notes from the test. This can include the reference interval (especially when it was not parsable).
+      - name: menoscale_raw
+        description: >
+          Append-only audit log of all MenoScale symptom scores ingested from Google Sheets.
+          Rows are never updated or deleted. When a source row is edited in the sheet,
+          a new row is inserted with a new hash, preserving the full edit history.
+          Deduplication to the latest version of each logical row happens in the staging layer.
+        columns:
+          - name: id
+            description: >
+              Auto-incrementing physical row identifier. Not a logical unique key —
+              the same score entry may appear more than once with different IDs if
+              the source row was edited and re-ingested.
+            tests:
+              - not_null
+          - name: ingested_at
+            description: Timestamp of when the row was ingested into the database.
+            tests:
+              - not_null
+          - name: source_file
+            description: Name of the source file.
+            tests:
+              - not_null
+          - name: row_hash
+            description: >
+              SHA256 hash of row content for deduplication. Unique per row version —
+              the same version of a row is never inserted twice.
+            tests:
+              - unique
+              - not_null
+          - name: date_raw
+            description: Date when the score was measured and recorded (e.g., "6-Apr-2023").
+          - name: score_raw
+            description: MenoScale score on a scale of 0-100.
