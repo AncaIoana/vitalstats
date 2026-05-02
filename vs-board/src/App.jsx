@@ -13,30 +13,30 @@ const STATUS_LABELS = { backlog: "Backlog", in_progress: "In Progress", done: "D
 const INITIAL_STORIES = [
   // ── PHASE 1 ────────────────────────────────────────────────────────────────
   // Security first — must happen before the first commit
-  { id: "s53", phase: "phase1", epic: "Security", title: "Set up .gitignore for credentials and sensitive files", status: "backlog", priority: "high", notes: "Must be done before first commit. Cover: .env, *.json (service accounts), *.pem, .venv/. Commit .env.example with placeholder values only. ADR-016." },
-  { id: "s54", phase: "phase1", epic: "Security", title: "Create synthetic fixture data for all tests", status: "backlog", priority: "high", notes: "All pytest fixtures must use fake dates, invented analyte values, fictional lab names. Never commit real health data to the repo. ADR-016." },
+  { id: "s53", phase: "phase1", epic: "Security", title: "Set up .gitignore for credentials and sensitive files", status: "done", priority: "high", notes: "Must be done before first commit. Cover: .env, *.json (service accounts), *.pem, .venv/. Commit .env.example with placeholder values only. ADR-016." },
+  { id: "s54", phase: "phase1", epic: "Security", title: "Create synthetic fixture data for all tests", status: "done", priority: "high", notes: "All pytest fixtures must use fake dates, invented analyte values, fictional lab names. Never commit real health data to the repo. ADR-016." },
 
   // Setup
-  { id: "s01", phase: "phase1", epic: "Setup", title: "Create GitHub repo + folder structure", status: "backlog", priority: "high", notes: "Monorepo layout as per ADR-010. Set up branch protection, main/dev/feature branches." },
-  { id: "s02", phase: "phase1", epic: "Setup", title: "Write README and project docs", status: "backlog", priority: "medium", notes: "Initial README with setup instructions. Upload project docs to Claude Project." },
+  { id: "s01", phase: "phase1", epic: "Setup", title: "Create GitHub repo + folder structure", status: "done", priority: "high", notes: "Monorepo layout as per ADR-010. Set up branch protection, main/dev/feature branches." },
+  { id: "s02", phase: "phase1", epic: "Setup", title: "Write README and project docs", status: "done", priority: "medium", notes: "Initial README with setup instructions. Upload project docs to Claude Project." },
 
   // Database — must exist before ingestion can load into it
-  { id: "s12", phase: "phase1", epic: "Database", title: "Set up local PostgreSQL + schemas", status: "backlog", priority: "high", notes: "Create raw, silver, gold schemas. Run CREATE TABLE scripts from database-schema.md." },
-  { id: "s13", phase: "phase1", epic: "Database", title: "Create pipeline_state + pipeline_run_log tables", status: "backlog", priority: "high", notes: "Two-table pattern. pipeline_state = current; pipeline_run_log = full history. ADR-012." },
+  { id: "s12", phase: "phase1", epic: "Database", title: "Set up local PostgreSQL + schemas", status: "done", priority: "high", notes: "Create raw, silver, gold schemas. Run CREATE TABLE scripts from database-schema.md." },
+  { id: "s13", phase: "phase1", epic: "Database", title: "Create pipeline_state + pipeline_run_log tables", status: "done", priority: "high", notes: "Two-table pattern. pipeline_state = current; pipeline_run_log = full history. ADR-012." },
 
   // Ingestion — Google Sheets API, then parsers, then pipeline hardening
-  { id: "s03", phase: "phase1", epic: "Ingestion", title: "Enable Google Sheets API + service account", status: "backlog", priority: "high", notes: "Create service account, store credentials in .env. Never commit to git." },
-  { id: "s04", phase: "phase1", epic: "Ingestion", title: "Write extract_blood_tests.py for blood_tests_bulk", status: "backlog", priority: "high", notes: "Read tab via API. Validate expected columns. Write raw JSON to /data/raw/." },
-  { id: "s05", phase: "phase1", epic: "Ingestion", title: "Write extract_menoscale.py for menoscale tab", status: "backlog", priority: "medium", notes: "Handle two date formats (hyphen + space). See blood-tests-schema.md for parser." },
-  { id: "s07", phase: "phase1", epic: "Ingestion", title: "Build result parser (parse_result.py)", status: "backlog", priority: "high", notes: "Handle numeric, <value, >value, negative, Not Detected, free text. See blood-tests-schema.md." },
-  { id: "s08", phase: "phase1", epic: "Ingestion", title: "Build reference interval parser", status: "backlog", priority: "medium", notes: "Handle range, lt, gt, N/A, narrative, Adults: pattern, empty." },
-  { id: "s06", phase: "phase1", epic: "Ingestion", title: "Implement hash-based deduplication", status: "backlog", priority: "high", notes: "SHA-256 hash of all fields. Compare against raw.blood_tests_raw on each run. ADR-005." },
-  { id: "s09", phase: "phase1", epic: "Ingestion", title: "Implement known values registry", status: "backlog", priority: "high", notes: "ingestion/config/known_values.py. Expected test types + collection sites. ADR-014." },
-  { id: "s10", phase: "phase1", epic: "Ingestion", title: "Implement unknown value detection + stg_unknown_values", status: "backlog", priority: "high", notes: "Log unknown analytes/sites to silver.stg_unknown_values. risk_level, run_id FK. ADR-014." },
-  { id: "s11", phase: "phase1", epic: "Ingestion", title: "Implement error handling strategy", status: "backlog", priority: "high", notes: "Hard vs soft failures. Atomic DB transactions. pipeline_run_log with rows_skipped_detail. ADR-013." },
+  { id: "s03", phase: "phase1", epic: "Ingestion", title: "Enable Google Sheets API + service account", status: "done", priority: "high", notes: "Create service account, store credentials in .env. Never commit to git." },
+  { id: "s04", phase: "phase1", epic: "Ingestion", title: "Write extract_blood_tests.py for blood_tests_bulk", status: "done", priority: "high", notes: "Read tab via API. Validate expected columns. Write raw JSON to /data/raw/." },
+  { id: "s05", phase: "phase1", epic: "Ingestion", title: "Write extract_menoscale.py for menoscale tab", status: "done", priority: "medium", notes: "Handle two date formats (hyphen + space). See blood-tests-schema.md for parser." },
+  { id: "s07", phase: "phase1", epic: "Ingestion", title: "Build result parser (parse_result.py)", status: "done", priority: "high", notes: "Handle numeric, <value, >value, negative, Not Detected, free text. See blood-tests-schema.md." },
+  { id: "s08", phase: "phase1", epic: "Ingestion", title: "Build reference interval parser", status: "done", priority: "medium", notes: "Handle range, lt, gt, N/A, narrative, Adults: pattern, empty." },
+  { id: "s06", phase: "phase1", epic: "Ingestion", title: "Implement hash-based deduplication", status: "done", priority: "high", notes: "SHA-256 hash of all fields. Compare against raw.blood_tests_raw on each run. ADR-005." },
+  { id: "s09", phase: "phase1", epic: "Ingestion", title: "Implement known values registry", status: "done", priority: "high", notes: "ingestion/config/known_values.py. Expected test types + collection sites. ADR-014." },
+  { id: "s10", phase: "phase1", epic: "Ingestion", title: "Implement unknown value detection + stg_unknown_values", status: "done", priority: "high", notes: "Log unknown analytes/sites to silver.stg_unknown_values. risk_level, run_id FK. ADR-014." },
+  { id: "s11", phase: "phase1", epic: "Ingestion", title: "Implement error handling strategy", status: "done", priority: "high", notes: "Hard vs soft failures. Atomic DB transactions. pipeline_run_log with rows_skipped_detail. ADR-013." },
 
   // dbt — staging first, then intermediate, then marts, then tests
-  { id: "s14", phase: "phase1", epic: "dbt", title: "Set up dbt Core project", status: "backlog", priority: "high", notes: "dbt init, profiles.yml for local postgres, folder structure: staging/intermediate/marts." },
+  { id: "s14", phase: "phase1", epic: "dbt", title: "Set up dbt Core project", status: "done", priority: "high", notes: "dbt init, profiles.yml for local postgres, folder structure: staging/intermediate/marts." },
   { id: "s15", phase: "phase1", epic: "dbt", title: "Write stg_blood_tests.sql", status: "backlog", priority: "high", notes: "Clean columns, cast types, parse dates, generate analyte_slug, unit normalisation." },
   { id: "s16", phase: "phase1", epic: "dbt", title: "Write stg_menoscale.sql", status: "backlog", priority: "medium", notes: "Clean date, validate score 0-100." },
   { id: "s17", phase: "phase1", epic: "dbt", title: "Write int_blood_tests_normalised.sql", status: "backlog", priority: "high", notes: "Add reference range columns, is_in_range, is_flagged_high/low." },

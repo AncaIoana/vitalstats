@@ -46,6 +46,7 @@ Built for one user. Designed to grow.
 | s09 | Implement known values registry | ✅ Done |
 | s10 | Implement unknown value detection + stg_unknown_values | ✅ Done |
 | s11 | Implement error handling strategy | ✅ Done |
+| s14 | Set up dbt Core project | ✅ Done |
 ---
 
 ## Architecture
