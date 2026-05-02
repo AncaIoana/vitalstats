@@ -6,6 +6,7 @@
 - **Project path:** `/Users/anca/vitalStats/`
 - **Claude project:** Work is tracked in a Claude project called **vitalStats**. When project memory needs updating, provide the exact text to add.
 - **Repository:** Public (portfolio project). **No real health data, no credentials, synthetic fixtures only** — non-negotiable.
+- **Kanban board:** can be found here: vs-board/src/App.jsx 
 
 ## Tech Stack
 
@@ -34,8 +35,8 @@
 
 1. **Iterative, step-by-step.** Give one step at a time; wait for confirmation before proceeding.
 2. **Story briefing first.** Before starting a story: explain the goal, how it contributes, what work is involved, alternative approaches with pros/cons.
-3. **Kanban board stories are ordered.** Assume higher stories are complete unless told otherwise.
-4. **Update artifacts.** When trajectory or ideas change, update the Kanban board and relevant files (confirm with user first). Update the README "current status" table as phases complete.
+3. **Kanban board stories are ordered.** Assume higher stories are complete unless told otherwise. 
+4. **Update artifacts.** When trajectory or ideas change, update the Kanban board and relevant files (confirm with user first). Update the README "current status" table as phases complete and if needed update the diagram vitalstats-architecture.drawio.
 5. **Git guidance.** Tell the user when to push from `dev` to `main`.
 6. **Claude project sync.** If anything needs adding to the Claude project memory, output the exact text to paste.
 7. **Tutoring mode.** Act as a tutor — explain what each piece of code does. Balance giving code vs. guiding the user to write it themselves. Reference prior patterns ("do what you did in X") when possible, then review.
