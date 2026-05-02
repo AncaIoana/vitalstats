@@ -1,1 +1,244 @@
-<mxfile host="0n61683d5bfd0crok2m043jbdll307hremtt63njgog4igcb7vo9" modified="2026-03-20T17:34:46.001Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.111.0 Chrome/142.0.7444.265 Electron/39.6.0 Safari/537.36" etag="poPow9RMucuMnDsKShEG" version="12.2.4" pages="1"><diagram id="vitalstats-arch" name="vitalStats Architecture">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</diagram></mxfile>
+<mxfile host="65bd71144e" pages="1">
+    <diagram id="vitalstats-arch" name="vitalStats Architecture">
+        <mxGraphModel dx="2515" dy="415" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="vitalStats — Personal Health Intelligence Platform" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#1a1a2e;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="20" width="1200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-sources" value="DATA SOURCES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#555555;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="200" width="120" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-ingest" value="INGESTION" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#555555;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="430" width="120" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-bronze" value="BRONZE (S3)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#b8620a;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="590" width="120" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-silver" value="SILVER (PostgreSQL)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#4a4a9e;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="720" width="120" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-gold" value="GOLD (PostgreSQL)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#2d7d5f;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="890" width="120" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="lbl-ml" value="ML / AI" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#9e2d5f;rotation=-90;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="1060" width="120" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-sources" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#d0d0d0;opacity=30;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="80" width="1380" height="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-ingest" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f0a500;opacity=20;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="430" width="1380" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-bronze" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#b8620a;opacity=20;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="580" width="1380" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-silver" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#4a4a9e;opacity=20;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="710" width="1380" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-gold" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4f0;strokeColor=#2d7d5f;opacity=20;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="890" width="1380" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="lane-ml" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#9e2d5f;opacity=20;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="1060" width="1380" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-blood" value="&lt;b&gt;Google Sheets&lt;/b&gt;&lt;br&gt;Blood Tests&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;blood_tests_bulk&lt;br&gt;menoscale&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;fontColor=#1e3a5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="140" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-meds" value="&lt;b&gt;Google Sheets&lt;/b&gt;&lt;br&gt;Medications &amp; Vaccines&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;Medications tab&lt;br&gt;Vaccines tab (Anca only)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;fontColor=#1e3a5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-fitbit" value="&lt;b&gt;Fitbit API&lt;/b&gt;&lt;br&gt;OAuth2&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;Steps, sleep, HR&lt;br&gt;SpO2, HRV&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#14532d;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-flo" value="&lt;b&gt;Flo App&lt;/b&gt;&lt;br&gt;GDPR JSON Export&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;Cycles, symptoms&lt;br&gt;mood, physical&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#14532d;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-pdf" value="&lt;b&gt;Medical Letters&lt;/b&gt;&lt;br&gt;PDF Files&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;Diagnoses, notes&lt;br&gt;pdfplumber / Textract&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontColor=#14532d;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="src-web" value="&lt;b&gt;NHS Inform&lt;/b&gt;&lt;br&gt;MedlinePlus&lt;br&gt;&lt;font color=&#39;#888888&#39; style=&#39;font-size:10px&#39;&gt;Analyte definitions&lt;br&gt;RAG enrichment&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontColor=#3b0764;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1040" y="110" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p1a" value="Phase 1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d7d5f;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="155" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p1b" value="Phase 1b" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a4a9e;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="335" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p4a" value="Phase 4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8620a;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="515" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p4b" value="Phase 4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8620a;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="695" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p4c" value="Phase 4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b8620a;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="875" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="badge-p3a" value="Phase 3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9e2d5f;strokeColor=none;fontColor=#ffffff;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1055" y="200" width="55" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9fafb;strokeColor=#9ca3af;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="1260" y="90" width="200" height="290" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-title" value="&lt;b&gt;Infrastructure&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontColor=#374151;" parent="1" vertex="1">
+                    <mxGeometry x="1260" y="95" width="200" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-gh" value="&lt;b&gt;GitHub Actions&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;CI + scheduled pipeline&lt;br&gt;ci.yml / pipeline.yml&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f4f6;strokeColor=#6b7280;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1275" y="125" width="170" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-tf" value="&lt;b&gt;Terraform&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;S3, RDS, IAM&lt;br&gt;Phase 2+&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f4f6;strokeColor=#6b7280;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1275" y="200" width="170" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-uv" value="&lt;b&gt;uv&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Python env + deps&lt;br&gt;pyproject.toml + uv.lock&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f4f6;strokeColor=#6b7280;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1275" y="268" width="170" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="infra-docker" value="&lt;b&gt;Docker&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Containerised pipeline&lt;br&gt;Phase 2+&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f4f6;strokeColor=#6b7280;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1275" y="336" width="170" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="ing-python" value="&lt;b&gt;Python Ingestion Scripts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;extract.py / extract_medications.py&lt;br&gt;Hash dedup · Known values registry&lt;br&gt;Hard/soft failure handling&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f0a500;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="450" width="960" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="ing-state" value="&lt;b&gt;pipeline_state&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;run log · dedup · error tracking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#d97706;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1180" y="450" width="200" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8f0;strokeColor=#b8620a;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="595" width="960" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-title" value="&lt;b&gt;AWS S3  —  s3://vitalstats-raw/&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontColor=#b8620a;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="597" width="400" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-blood" value="blood_tests/&lt;br&gt;YYYY-MM-DD/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#b8620a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="215" y="620" width="130" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-meds" value="medications_vaccines/&lt;br&gt;YYYY-MM-DD/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#b8620a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="620" width="150" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-fitbit" value="fitbit/&lt;br&gt;YYYY-MM-DD/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#b8620a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="525" y="620" width="130" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-flo" value="flo/&lt;br&gt;YYYY-MM-DD/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#b8620a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="670" y="620" width="130" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-pdf" value="medical_letters/&lt;br&gt;YYYY-MM-DD/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fed7aa;strokeColor=#b8620a;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="815" y="620" width="150" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3-immutable" value="Raw · Immutable · Never edited" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=10;fontColor=#b8620a;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="830" y="597" width="320" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="silver-title" value="&lt;b&gt;PostgreSQL — silver schema&lt;/b&gt;  (dbt staging models)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontColor=#4a4a9e;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="715" width="600" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-blood" value="stg_blood_tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="215" y="738" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-meno" value="stg_menoscale" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="370" y="738" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-meds" value="stg_medications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="515" y="738" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-vax" value="stg_vaccines" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="738" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-fitbit" value="stg_fitbit_daily&lt;br&gt;stg_fitbit_sleep" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="795" y="738" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-flo" value="stg_flo_cycles&lt;br&gt;stg_flo_symptoms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="738" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="stg-unknown" value="stg_unknown_values&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;data quality parking&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fecdd3;strokeColor=#e11d48;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1075" y="738" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="dbt-label" value="dbt Core transforms" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontSize=10;fontColor=#4a4a9e;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="1060" y="715" width="300" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="gold-title" value="&lt;b&gt;PostgreSQL — gold schema&lt;/b&gt;  (dbt mart models)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontColor=#2d7d5f;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="895" width="600" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-trends" value="mart_blood_trends&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;rolling avg · z-score · flags&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="215" y="918" width="160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-timeline" value="mart_health_timeline&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;unified event log (all sources)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="918" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-features" value="mart_ml_features&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;wide feature table for ML&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="575" y="918" width="160" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-refranges" value="mart_reference_ranges&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;canonical reference ranges&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="750" y="918" width="165" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-analyte" value="mart_analyte_reference&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;plain-English definitions (RAG)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="918" width="170" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="mart-insights" value="mart_insights&lt;br&gt;&lt;font style=&#39;font-size:9px&#39;&gt;LLM prompts + responses&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f3d0;strokeColor=#2d7d5f;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1115" y="918" width="155" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="ml-anomaly" value="&lt;b&gt;Anomaly Detection&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Isolation Forest&lt;br&gt;z-score (personal history)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#9e2d5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="215" y="1078" width="175" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ml-trends" value="&lt;b&gt;Trend Forecasting&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Facebook Prophet&lt;br&gt;per-marker forecasts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#9e2d5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="1078" width="175" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ml-llm" value="&lt;b&gt;LLM Insights&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Claude API&lt;br&gt;plain-English summaries&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#9e2d5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="605" y="1078" width="175" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="ml-rag" value="&lt;b&gt;RAG Enrichment&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Retrieve NHS/MedlinePlus&lt;br&gt;contextualised explanations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce7f3;strokeColor=#9e2d5f;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="800" y="1078" width="175" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="frontend" value="&lt;b&gt;Streamlit Dashboard&lt;/b&gt;&lt;br&gt;&lt;font style=&#39;font-size:10px&#39;&gt;Blood test history · Trend charts&lt;br&gt;AI insights panel · Phase 5&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1a1a2e;strokeColor=#1a1a2e;fontColor=#ffffff;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="1050" y="1078" width="200" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-blood-ing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0;entryDx=0;entryDy=0;strokeColor=#3b82f6;" parent="1" source="src-blood" target="ing-python" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-meds-ing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#3b82f6;" parent="1" source="src-meds" target="ing-python" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-fitbit-ing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16a34a;" parent="1" source="src-fitbit" target="ing-python" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-flo-ing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16a34a;" parent="1" source="src-flo" target="ing-python" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-pdf-ing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#16a34a;" parent="1" source="src-pdf" target="ing-python" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-ing-s3" value="raw files" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#b8620a;fontColor=#b8620a;fontSize=10;" parent="1" source="ing-python" target="s3-box" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-s3-silver" value="dbt staging" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#4a4a9e;fontColor=#4a4a9e;fontSize=10;" parent="1" source="s3-box" target="stg-blood" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-silver-gold" value="dbt marts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#2d7d5f;fontColor=#2d7d5f;fontSize=10;" parent="1" source="stg-blood" target="mart-trends" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-gold-ml" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#9e2d5f;" parent="1" source="mart-features" target="ml-anomaly" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-gold-trend" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#9e2d5f;" parent="1" source="mart-trends" target="ml-trends" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-gold-llm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#9e2d5f;" parent="1" source="mart-trends" target="ml-llm" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-analyte-rag" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#9e2d5f;" parent="1" source="mart-analyte" target="ml-rag" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-web-rag" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#7c3aed;" parent="1" source="src-web" target="mart-analyte" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-llm-insights" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#9e2d5f;" parent="1" source="ml-llm" target="mart-insights" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-gold-fe" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#1a1a2e;" parent="1" source="mart-insights" target="frontend" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr-ing-state" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#d97706;dashed=1;" parent="1" source="ing-python" target="ing-state" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
