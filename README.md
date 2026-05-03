@@ -116,7 +116,7 @@ Google Sheets API  →  Python ingestion  →  S3 (Bronze)
 ```
 vitalStats/
 ├── .github/
-│   └── workflows/
+│   └── workflows/                      # Phase 2
 │       ├── ci.yml                      # CI + scheduled pipeline
 │       └── pipeline.yml
 ├── ingestion/
@@ -126,7 +126,14 @@ vitalStats/
 │   │   └── sheets_client.py
 │   ├── config/
 │   │   └── known_values.py             # Registry of expected analytes, sites, test types
+│   ├── fitbit/                         # Phase 4
+│   ├── pdf_parser/                     # Phase 4
 │   └── utils/                          # Shared parsing utilities
+│   │   ├── dates.py                    # Date parsing utilities
+│   │   ├── hashing.py                  # Row hashing utilities
+│   │   ├── pipeline.py                 # Shared pipeline utilities
+│   │   ├── ref_interval_parser.py      # Parse a raw reference interval string
+│   │   └── result_parser.py            # Parse a raw result string
 ├── dbt/
 │   ├── dbt_project.yml                 # Project config (materializations, folders)
 │   ├── models/

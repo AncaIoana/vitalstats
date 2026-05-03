@@ -2,7 +2,7 @@
 
 ## Project Path
 - `/Users/anca/projects/vitalstats`
-- anything else in the ``/Users/anca/projects/` directory should be ignored
+- anything else in the ``/Users/anca/projects/` directory should be ignored when working on vitalstats project
 
 ## Project Context
 
