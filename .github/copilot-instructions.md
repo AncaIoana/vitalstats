@@ -1,5 +1,9 @@
 # GitHub Copilot Instructions — health-intel (vitalStats)
 
+## Project Path
+- `/Users/anca/projects/vitalstats`
+- anything else in the ``/Users/anca/projects/` directory should be ignored
+
 ## Project Context
 
 - **Developer:** Data engineer building a personal health intelligence platform called **health-intel**.
@@ -7,6 +11,8 @@
 - **Claude project:** Work is tracked in a Claude project called **vitalStats**. When project memory needs updating, provide the exact text to add.
 - **Repository:** Public (portfolio project). **No real health data, no credentials, synthetic fixtures only** — non-negotiable.
 - **Kanban board:** can be found here: vs-board/src/App.jsx 
+- **Documentation:** all documentation is in `docs` directory; check there before starting work or answering questions, and make sure all these markdown
+documents are kept up to date as the work progresses (suggest changes to user, check before making changes)
 
 ## Tech Stack
 
@@ -53,3 +59,11 @@
 
 - Mock at the router module level: `@patch("src.api.routers.<module>.run_query")`.
 - Use appropriate test client fixtures for the endpoint type.
+
+## Communication style
+
+- Act as a rigorous, evidence-driven analyst. Prioritize accuracy, logical consistency, and usefulness over agreement or politeness. Treat helpfulness as delivering the most correct and well-reasoned answer, not the one that aligns with my expectations. Actively identify and challenge incorrect, weak, or incomplete assumptions, and explain why they are flawed.
+- Present counterarguments and alternative perspectives where relevant, and explicitly state uncertainty when evidence is limited. Do not invent confidence or oversimplify complex topics. Be direct and precise in critique without unnecessary softening.
+- Structure responses with clear reasoning, including assumptions, evaluation, and conclusion. Your goal is to improve my thinking, not to validate it.
+- If my request is based on a false premise, point it out before answering.
+- When relevant, discuss trade-offs, edge cases, and failure modes.

@@ -60,7 +60,7 @@ Google Sheets API  →  Python ingestion  →  S3 (Bronze)
                                               ↓
                                          dbt staging
                                               ↓
-                                  silver.stg_blood_tests
+                                  silver.stg_google_sheets__blood_tests_vw
                                               ↓
                                           dbt marts
                                               ↓
@@ -117,47 +117,51 @@ Google Sheets API  →  Python ingestion  →  S3 (Bronze)
 vitalStats/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                  # Run tests on every PR
-│       └── pipeline.yml            # Scheduled data pipeline
+│       ├── ci.yml                      # CI + scheduled pipeline
+│       └── pipeline.yml
 ├── ingestion/
 │   ├── google_sheets/
-│   │   ├── extract_blood_tests.py  # Google Sheets API ingestion
-│   │   ├── extract_menoscale.py    # Google Sheets API ingestion
-│   │   ├── extract_utils.py    # Google Sheets API ingestion
+│   │   ├── extract_blood_tests.py      # Blood tests ingestion
+│   │   ├── extract_menoscale.py        # MenoScale ingestion
 │   │   └── sheets_client.py
 │   ├── config/
-│   │   └── known_values.py         # Registry of expected analytes, sites, test types
-│   ├── utils/
-│   │   └── result_parser.py        # Parse "< 0.6", "negative", "48" etc.
-│   ├── fitbit/                     # Phase 4
-│   └── pdf_parser/                 # Phase 4
+│   │   └── known_values.py             # Registry of expected analytes, sites, test types
+│   └── utils/                          # Shared parsing utilities
 ├── dbt/
+│   ├── dbt_project.yml                 # Project config (materializations, folders)
 │   ├── models/
-│   │   ├── staging/                # stg_blood_tests, stg_menoscale
-│   │   ├── intermediate/           # int_blood_tests_normalised
-│   │   └── marts/                  # mart_blood_trends, mart_health_timeline, mart_ml_features
+│   │   ├── sources.yml                 # Raw source table definitions
+│   │   ├── staging/                    # stg_google_sheets__blood_tests_vw, stg_google_sheets__menoscale_vw
+│   │   ├── intermediate/               # int_blood_tests_normalised_vw
+│   │   └── marts/                      # mart_blood_trends, mart_health_timeline, mart_ml_features
 │   └── tests/
-├── ml/
-│   ├── anomaly_detection/          # Phase 3
-│   ├── trend_analysis/             # Phase 3
-│   └── llm_insights/               # Phase 3
 ├── infrastructure/
-│   └── terraform/                  # Phase 2
+│   └── database/
+│       ├── init_schemas.sql            # Creates raw/silver/gold schemas (run once)
+│       └── create_ingestion_tables.sql # Ingestion-owned tables (run once)
+│       └── terraform/                  # Phase 2 IaC (if present)
+├── ml/
+│   ├── anomaly_detection/
+│   ├── trend_analysis/
+│   └── llm_insights/
 ├── notebooks/
 │   └── eda/
-├── app/                            # Phase 5
-├── docker/                         # Phase 2
+├── app/                                # Phase 5 (Streamlit)
+├── docker/                             # Docker assets (Phase 2)
 ├── docs/
+│   ├── adr.md
 │   ├── database-schema.md
 │   ├── blood-tests-schema.md
-│   ├── adr.md
-│   └── project-plan.md
+│   └── medications-vaccines-schema.md
 ├── tests/
+│   ├── fixtures/
 │   ├── unit/
 │   └── integration/
+├── vs-board/                           # Local kanban board (React + Vite)
 ├── .env.example
-├── requirements.txt
-├── Makefile
+├── pyproject.toml
+├── uv.lock
+├── vitalstats-architecture.drawio      # Architecture diagram (project root)
 └── README.md
 ```
 
@@ -253,14 +257,16 @@ DB_PASSWORD=your_password
 ### 4. Set up the database
 
 ```bash
-psql -U your_user -d vitalstats -f docs/database-schema.sql
+# Create schemas (run once)
+psql -d vitalstats -f infrastructure/database/init_schemas.sql
 ```
 
-start PostgreSQL
-
-```bash
-brew services start postgresql@14
 ```
+# Create ingestion-owned tables (run once)
+psql -d vitalstats -f infrastructure/database/create_ingestion_tables.sql
+```
+
+dbt creates all Silver and Gold objects automatically on first dbt run — do not create them manually.
 
 ### 5. Configure dbt
 
@@ -443,26 +449,68 @@ psql vitalstats -c "SELECT source, rows_fetched, rows_ingested, rows_skipped, st
 An unknown **test type** will abort the run. Check `ingestion/config/known_values.py` and add the new value, then re-run.
 
 An unknown **collection site** will complete with `status=partial`. Review the entry in:
+
 ```bash
 psql vitalstats -c "SELECT * FROM silver.stg_unknown_values WHERE resolved = FALSE;"
 ```
 
 Follow the resolution workflow in `docs/blood-tests-schema.md` under *What happens when an unknown value is detected*.
 
+## Running PostgreSQL
+
+### 1. Make sure PostgreSQL is running
+
+```bash
+brew services list | grep postgres
+```
+
+If it's not running, then start it:
+
+```bash
+brew services start postgresql@14
+```
+
+### 2. Open an interactive session
+
+```bash
+psql -d vitalstats
+```
+
+### 3. Run the SQL queries
+
+The terminal will now show `vitalstats=#` . Type SQL queries, making sure they are followed by `;`. For example:
+
+```SQL
+SELECT * FROM raw.blood_tests_raw
+```
+
+### 4. Exit the interactive session
+
+To exit, just type `exit` in the session.
+
+#### Alternative to the interactive session
+
+```bash
+psql vitalstats -c "SELECT * FROM silver.stg_unknown_values WHERE resolved = FALSE;"
+```
+
 ## Running tests
 
 Install dependencies:
+
 ```bash
 uv sync
 ```
 
 Run all tests:
+
 ```bash
 uv run pytest
 uv run pytest tests/unit/ -v
 ```
 
 Run with coverage (shows percentage):
+
 ```bash
 uv run pytest --cov=ingestion
 ```
