@@ -676,3 +676,31 @@ All warnings are non-blocking. The row is still ingested. The warning is logged.
 - Suspicious values are immediately visible in SQL without hunting through logs
 - `status = "partial"` makes runs with warnings visibly distinct from clean runs
 - Implementation is deferred to Phase 1b — Phase 1 uses the simpler hard/soft failure model only
+
+## ADR-018: Documentation strategy — README as single source of truth
+
+**Date:** 2026-05
+**Status:** Accepted
+
+**Context:**
+As the project grows, setup instructions and operational guidance risk being
+duplicated across README, SQL file headers, Python module docstrings, and docs/.
+Duplication causes drift — files go stale, instructions contradict each other.
+
+**Decision:**
+- **README.md** is the single source of truth for all setup and operational
+  instructions (local setup, database setup, running the pipeline, running tests,
+  daily workflow).
+- **Individual files** (SQL, Python, YAML) carry a brief header only:
+  what the file does, the command to run it, and any warnings needed before
+  modifying. No full walkthroughs.
+- **docs/ markdown files** document design decisions, schemas, and data
+  contracts — not how to run things.
+- **ADRs** document why architectural decisions were made.
+
+**Consequences:**
+- One place to update when setup changes — README only.
+- File headers stay short and scannable.
+- New contributors read README first and get everything they need.
+- Risk: README can become long. Mitigate with clear section headers and a
+  table of contents if needed.

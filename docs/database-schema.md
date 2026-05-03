@@ -6,17 +6,32 @@
 S3 (Bronze / Raw)  →  PostgreSQL Silver (Staging)  →  PostgreSQL Gold (Marts)
 ```
 
+## Ownership Model
+
+| Owner | Creates | Tool |
+|---|---|---|
+| Ingestion scripts | `raw.*` tables, `silver.stg_unknown_values` | `create_ingestion_tables.sql` |
+| dbt | All other `silver.*` views and `gold.*` tables | `dbt run` |
+
+### Setup order on a fresh database
+1. `psql -d vitalstats -f infrastructure/database/init_schemas.sql`
+2. `psql -d vitalstats -f infrastructure/database/create_ingestion_tables.sql`
+3. `uv run python -m ingestion.google_sheets.extract_blood_tests`
+4. `uv run python -m ingestion.google_sheets.extract_menoscale`
+5. `cd dbt && uv run dbt run`
+
+dbt creates all Silver views and Gold tables automatically. They are never pre-created in SQL files.
 All dbt models live in PostgreSQL. Raw files (original CSVs, API responses) are archived in S3.
 
 ---
 
 ## PostgreSQL Schemas
 
-| Schema | Purpose | dbt layer |
+| Schema | Purpose | Owner |
 |---|---|---|
 | `raw` | Loaded directly from source, minimal transformation | Loaded by Python ingestion scripts |
-| `silver` | Cleaned, typed, deduplicated, normalised | dbt staging + intermediate models |
-| `gold` | Analytics-ready, ML-ready, business logic applied | dbt mart models |
+| `silver` | Cleaned, typed, deduplicated, normalised | dbt (views) + ingestion (stg_unknown_values only) |
+| `gold` | Analytics-ready, ML-ready, business logic applied | dbt (tables) |
 
 ---
 
@@ -80,11 +95,63 @@ CREATE TABLE raw.menoscale_raw (
 
 ---
 
-### `silver.stg_blood_tests`
+### `raw.medications_raw`
+Direct load from CSV. No transformations. Preserves source exactly.
+
+```sql
+CREATE TABLE IF NOT EXISTS raw.medications_raw (
+    id                      SERIAL PRIMARY KEY,
+    ingested_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+    source_file             TEXT NOT NULL,
+    row_hash                TEXT NOT NULL,
+    medication_name_raw     TEXT,
+    dosage_raw              TEXT,
+    start_date_raw          TEXT,
+    end_date_raw            TEXT,
+    frequency_raw           TEXT,
+    notes_raw               TEXT
+);
+```
+
+---
+
+### `raw.vaccines_raw`
+Direct load from CSV. No transformations. Preserves source exactly.
+
+```sql
+CREATE TABLE IF NOT EXISTS raw.vaccines_raw (
+    id                      SERIAL PRIMARY KEY,
+    ingested_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+    source_file             TEXT NOT NULL,
+    row_hash                TEXT NOT NULL,
+    name_raw                TEXT,
+    date_administered_raw   TEXT,
+    vaccine_type_dose_raw   TEXT,
+    immunity_duration_raw   TEXT,
+    booster_due_raw         TEXT,
+    is_most_recent_raw      TEXT,
+    administration_site_raw TEXT,
+    vaccination_location_raw TEXT,
+    batch_lot_number_raw    TEXT,
+    vaccine_product_name_raw TEXT,
+    expiration_date_raw     TEXT,
+    manufacturer_raw        TEXT,
+    notes_raw               TEXT
+);
+```
+
+**Note:** Medications and vaccines raw tables (`raw.medications_raw`, `raw.vaccines_raw`)
+follow the same append-only audit log pattern as blood tests.
+Python ingestion writes to raw; dbt transforms to silver views.
+
+---
+
+### `silver.stg_google_sheets__blood_tests_vw`
+
 Cleaned and typed. One row per analyte per date per collection site.
 
 ```sql
-CREATE TABLE silver.stg_blood_tests (
+CREATE TABLE silver.stg_google_sheets__blood_tests_vw (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     test_date            DATE NOT NULL,                     -- parsed from "6-Apr-2023"
     test_type            TEXT NOT NULL,                     -- "Biochemistry", "Hematology", etc.
@@ -107,9 +174,9 @@ CREATE TABLE silver.stg_blood_tests (
     loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_stg_bt_date ON silver.stg_blood_tests(test_date);
-CREATE INDEX idx_stg_bt_analyte ON silver.stg_blood_tests(analyte_slug);
-CREATE INDEX idx_stg_bt_date_analyte ON silver.stg_blood_tests(test_date, analyte_slug);
+CREATE INDEX idx_stg_bt_date ON silver.stg_google_sheets__blood_tests_vw(test_date);
+CREATE INDEX idx_stg_bt_analyte ON silver.stg_google_sheets__blood_tests_vw(analyte_slug);
+CREATE INDEX idx_stg_bt_date_analyte ON silver.stg_google_sheets__blood_tests_vw(test_date, analyte_slug);
 ```
 
 **Key transformation logic in dbt:**
@@ -121,11 +188,11 @@ CREATE INDEX idx_stg_bt_date_analyte ON silver.stg_blood_tests(test_date, analyt
 
 ---
 
-### `silver.stg_menoscale`
+### `silver.stg_google_sheets__menoscale_vw`
 Cleaned menoscale scores.
 
 ```sql
-CREATE TABLE silver.stg_menoscale (
+CREATE TABLE silver.stg_google_sheets__menoscale_vw (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     recorded_date        DATE NOT NULL,
     total_score          NUMERIC(6, 2),
@@ -203,11 +270,11 @@ CREATE TABLE silver.stg_flo_symptoms (
 
 ---
 
-### `silver.stg_medications`
+### `silver.silver.stg_google_sheets__medications_vw`
 One row per medication period. Same medication appears multiple times as dosage or frequency changes over time.
 
 ```sql
-CREATE TABLE silver.stg_medications (
+CREATE TABLE silver.silver.stg_google_sheets__medications_vw (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     medication_name      TEXT NOT NULL,
     medication_slug      TEXT NOT NULL,                     -- "metyrapone", "ferrous_sulfate" etc.
@@ -224,8 +291,8 @@ CREATE TABLE silver.stg_medications (
     loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_stg_med_slug ON silver.stg_medications(medication_slug);
-CREATE INDEX idx_stg_med_dates ON silver.stg_medications(start_date, end_date);
+CREATE INDEX idx_stg_med_slug ON silver.silver.stg_google_sheets__medications_vw(medication_slug);
+CREATE INDEX idx_stg_med_dates ON silver.silver.stg_google_sheets__medications_vw(start_date, end_date);
 ```
 
 **Key transformation logic:**
@@ -235,11 +302,11 @@ CREATE INDEX idx_stg_med_dates ON silver.stg_medications(start_date, end_date);
 
 ---
 
-### `silver.stg_vaccines`
+### `silver.stg_google_sheets__vaccines_vw`
 One row per vaccine administration. Tracked person rows only — partner rows filtered out at ingestion.
 
 ```sql
-CREATE TABLE silver.stg_vaccines (
+CREATE TABLE silver.stg_google_sheets__vaccines_vw (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     vaccine_type_dose    TEXT NOT NULL,                     -- "HPV (1st dose)", "Covid-19", "DTP (...)"
     dose_number          INTEGER,                           -- parsed from "(1st dose)" → 1. NULL if no dose in name
@@ -260,9 +327,9 @@ CREATE TABLE silver.stg_vaccines (
     loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_stg_vax_slug ON silver.stg_vaccines(vaccine_slug);
-CREATE INDEX idx_stg_vax_date ON silver.stg_vaccines(date_administered);
-CREATE INDEX idx_stg_vax_most_recent ON silver.stg_vaccines(vaccine_slug, is_most_recent);
+CREATE INDEX idx_stg_vax_slug ON silver.stg_google_sheets__vaccines_vw(vaccine_slug);
+CREATE INDEX idx_stg_vax_date ON silver.stg_google_sheets__vaccines_vw(date_administered);
+CREATE INDEX idx_stg_vax_most_recent ON silver.stg_google_sheets__vaccines_vw(vaccine_slug, is_most_recent);
 ```
 
 **Key transformation logic:**
@@ -531,7 +598,7 @@ WHERE id = <id>;
 
 ## Unit Normalisation Map
 
-Key conversions applied in `silver.stg_blood_tests`:
+Key conversions applied in `silver.stg_google_sheets__blood_tests_vw`:
 
 | Analyte | Synevo unit | NHS unit | Conversion |
 |---|---|---|---|

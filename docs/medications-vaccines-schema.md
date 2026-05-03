@@ -259,7 +259,8 @@ All parsers emit structured warnings for field values that are technically valid
 **Outputs:**
 - Raw JSON to `s3://vitalstats-raw/medications_vaccines/YYYY-MM-DD/medications.json`
 - Raw JSON to `s3://vitalstats-raw/medications_vaccines/YYYY-MM-DD/vaccines.json`
-- Loaded into `silver.stg_medications` and `silver.stg_vaccines`
+- Loaded into `raw.medications_raw` and `raw.vaccines_raw`
+- dbt transforms these into `silver.stg_google_sheets__medications_vw` and `silver.stg_google_sheets__vaccines_vw` on next dbt run
 
 **Validation checks (pre-load):**
 1. Expected columns present in both tabs (raise if missing)
