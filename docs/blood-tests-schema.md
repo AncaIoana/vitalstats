@@ -256,10 +256,10 @@ def parse_menoscale_date(raw: str) -> date:
 
 This also handles full month names (`"April"`) in case future entries use those.
 
-### Staging model: `silver.stg_menoscale`
+### Staging model: `silver.stg_google_sheets__menoscale_vw`
 
 ```sql
-CREATE TABLE silver.stg_menoscale (
+CREATE TABLE silver.stg_google_sheets__menoscale_vw (
     stg_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     recorded_date    DATE NOT NULL,
     score            INTEGER NOT NULL CHECK (score >= 0 AND score <= 100),
@@ -335,7 +335,7 @@ Maintained in `ingestion/config/known_values.py`. This is the canonical list of 
 4. For unknown analytes: pipeline continues with `status = "success"`; analyte will lack reference range in Gold until manually added
 5. Resolution: update `known_values.py`, add to `gold.mart_reference_ranges` if needed
 6. For new analytes: run `dbt run`
-7. For new collection sites: run `dbt run --full-refresh --select stg_blood_tests`, then `dbt run` for marts
+7. For new collection sites: run `dbt run --full-refresh --select stg_google_sheets__blood_tests_vw`, then `dbt run` for marts
 8. Set `stg_unknown_values.resolved = TRUE`, `resolved_at = NOW()`, add `resolution_note`
 
 ---

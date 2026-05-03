@@ -583,7 +583,7 @@ CREATE TABLE silver.stg_unknown_values (
 | Scenario | Steps | dbt command |
 |---|---|---|
 | New analyte | Add to `mart_reference_ranges` + `mart_analyte_reference` → run dbt | `dbt run` |
-| New collection site | Update `known_values.py` → delete affected Silver rows → rebuild | `dbt run --full-refresh --select stg_blood_tests` |
+| New collection site | Update `known_values.py` → delete affected Silver rows → rebuild | `dbt run --full-refresh --select stg_google_sheets__blood_tests_vw` |
 
 After resolving either scenario:
 ```sql
@@ -617,9 +617,9 @@ Canonical units follow NHS convention (mmol/L, μmol/L, g/L etc.) as that is the
 
 | Model | Test | Description |
 |---|---|---|
-| `stg_blood_tests` | `not_null` | `test_date`, `analyte_name`, `collection_site` |
-| `stg_blood_tests` | `unique` | `(test_date, analyte_slug, collection_site)` composite |
-| `stg_blood_tests` | `accepted_values` | `test_type` in known categories |
+| `stg_google_sheets__blood_tests_vw` | `not_null` | `test_date`, `analyte_name`, `collection_site` |
+| `stg_google_sheets__blood_tests_vw` | `unique` | `(test_date, analyte_slug, collection_site)` composite |
+| `stg_google_sheets__blood_tests_vw` | `accepted_values` | `test_type` in known categories |
 | `mart_blood_trends` | custom | `z_score` must be computable when `reading_count >= 3` |
 | `mart_blood_trends` | custom | `trend_direction` not null when `reading_count >= 4` |
 | `mart_health_timeline` | `not_null` | `event_date`, `event_type`, `source_system` |
