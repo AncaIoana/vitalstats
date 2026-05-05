@@ -1,0 +1,152 @@
+version: 2
+
+models:
+  - name: stg_google_sheets__blood_tests_vw
+    description: >
+      Staging view for blood test data ingested from Google Sheets.
+      Parses raw strings into typed columns, generates canonical analyte slugs,
+      and deduplicates to the latest ingested version of each logical row.
+      A logical row is uniquely identified by (test_date, analyte_slug, collection_site).
+      Rows are never deleted from the raw source — edits produce new raw rows with
+      a different hash. This view surfaces only the most recently ingested version.
+      Unit normalisation and reference range enrichment happen in the intermediate layer.
+    columns:
+      - name: id
+        description: >
+          Physical row identifier from raw.blood_tests_raw. Not a logical unique key —
+          the same blood test may have multiple raw rows if edited and re-ingested.
+        tests:
+          - not_null
+
+      - name: test_date
+        description: >
+          Date the blood test was taken, parsed from the raw string (e.g. "6-Apr-2023").
+          NULL if the date string could not be parsed — rows with NULL test_date will
+          fail this test and surface for investigation.
+        tests:
+          - not_null
+
+      - name: test_type
+        description: >
+          Clinical category of the test, lowercased. Validated against known_values.py
+          at ingestion time — only known values reach this table.
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                - biochemistry
+                - hematology
+                - immunochemistry
+                - microbiology
+                - endocrinology
+                - coagulation
+
+      - name: analyte_name
+        description: Cleaned analyte name as it appears in the source sheet (trimmed, no slug transformation).
+        tests:
+          - not_null
+
+      - name: analyte_slug
+        description: >
+          Canonical lowercase identifier for the analyte. Used for joining across tables
+          and as the primary key component in gold marts.
+          Multiple source names for the same analyte (lab variants, legacy names,
+          Romanian synonyms) map to the same slug. Unmapped analytes fall back to
+          an auto-generated slug via regexp_replace.
+        tests:
+          - not_null
+
+      - name: result_qualifier
+        description: >
+          Qualifier prefix extracted from the result string.
+          'lt' for less-than (e.g. "< 5.0"), 'gt' for greater-than (e.g. ">120").
+          NULL for plain numeric or categorical results.
+
+      - name: result_numeric
+        description: >
+          Numeric component of the result, cast to NUMERIC.
+          Qualifier prefix is stripped before casting (e.g. "< 5.0" → 5.0).
+          NULL for categorical results ("negative", "Not Detected", etc.).
+
+      - name: result_is_numeric
+        description: >
+          TRUE when the result resolves to a plain number (with or without qualifier prefix).
+          FALSE for categorical strings.
+        tests:
+          - not_null
+
+      - name: result_text
+        description: >
+          Normalised lowercase slug for categorical results (e.g. "not_detected", "negative").
+          NULL when result_is_numeric is TRUE.
+
+      - name: unit
+        description: Raw unit of measurement as it appears in the source sheet. NULL if blank.
+
+      - name: unit_normalised
+        description: >
+          Canonical unit after conversion to NHS/SI convention (e.g. mmol/L).
+          NULL at this layer — populated in int_google_sheets__blood_tests_normalised_vw.
+
+      - name: result_normalised
+        description: >
+          Result value converted to the canonical unit.
+          NULL at this layer — populated in int_google_sheets__blood_tests_normalised_vw.
+
+      - name: ref_type
+        description: >
+          Classification of the reference interval format.
+          'range' = numeric range (e.g. "3.5-5.0"),
+          'lt' = upper bound only (e.g. "< 35"),
+          'gt' = lower bound only (e.g. "> 1.99"),
+          'categorical' = N/A or non-applicable,
+          'narrative' = complex or multi-condition string stored verbatim in ref_text_raw,
+          'unknown' = absent or blank.
+
+      - name: ref_low
+        description: >
+          Parsed lower bound of the reference interval.
+          Populated for 'range' and 'gt' ref_types. NULL otherwise.
+
+      - name: ref_high
+        description: >
+          Parsed upper bound of the reference interval.
+          Populated for 'range' and 'lt' ref_types. NULL otherwise.
+
+      - name: ref_text_raw
+        description: >
+          Original reference interval string preserved verbatim.
+          Always present when source had a value — used for audit and for narrative
+          intervals that cannot be parsed into ref_low / ref_high.
+
+      - name: collection_site
+        description: >
+          Name of the lab or practice where the blood was collected.
+          Validated against known_values.py at ingestion — unknown sites produce
+          a partial run status and are logged to silver.stg_unknown_values.
+        tests:
+          - not_null
+
+      - name: notes
+        description: Additional notes from the source sheet. NULL if blank.
+
+      - name: is_duplicate
+        description: >
+          Always FALSE in this view — deduplication ensures only the latest version
+          of each logical row is returned. Retained as a column for schema
+          compatibility with downstream models.
+        tests:
+          - not_null
+
+      - name: source_row_hash
+        description: >
+          SHA-256 hash of the raw row content, carried from raw.blood_tests_raw.
+          Used to trace any silver row back to its exact raw source version.
+        tests:
+          - not_null
+          - unique
+
+      - name: loaded_at
+        description: Timestamp when the raw row was ingested into raw.blood_tests_raw.
+        tests:
+          - not_null

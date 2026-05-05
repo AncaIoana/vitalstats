@@ -36,8 +36,8 @@ const INITIAL_STORIES = [
   { id: "s11", phase: "phase1", epic: "Ingestion", title: "Implement error handling strategy", status: "done", priority: "high", notes: "Hard vs soft failures. Atomic DB transactions. pipeline_run_log with rows_skipped_detail. ADR-013." },
 
   // dbt — staging first, then intermediate, then marts, then tests
-  { id: "s14", phase: "phase1", epic: "dbt", title: "Set up dbt Core project", status: "done", priority: "high", notes: "dbt init, profiles.yml for local postgres, folder structure: staging/intermediate/marts." },
-  { id: "s15", phase: "phase1", epic: "dbt", title: "Write stg_google_sheets__blood_tests_vw.sql", status: "backlog", priority: "high", notes: "Clean columns, cast types, parse dates, generate analyte_slug, unit normalisation. Output: silver.stg_google_sheets__blood_tests_vw" },
+  { id: "s14", phase: "phase1", epic: "dbt", title: "Set up dbt Core project", status: "done", priority: "done", notes: "dbt init, profiles.yml for local postgres, folder structure: staging/intermediate/marts." },
+  { id: "s15", phase: "phase1", epic: "dbt", title: "Write stg_google_sheets__blood_tests_vw.sql", status: "done", priority: "high", notes: "Clean columns, cast types, parse dates, generate analyte_slug, unit normalisation. Output: silver.stg_google_sheets__blood_tests_vw" },
   { id: "s16", phase: "phase1", epic: "dbt", title: "Write stg_google_sheets__menoscale_vw.sql", status: "backlog", priority: "medium", notes: "Clean date, validate score 0-100. Output: silver.stg_google_sheets__menoscale_vw" },
   { id: "s17", phase: "phase1", epic: "dbt", title: "Write int_blood_tests_normalised.sql", status: "backlog", priority: "high", notes: "Add reference range columns, is_in_range, is_flagged_high/low." },
   { id: "s18", phase: "phase1", epic: "dbt", title: "Write mart_blood_trends.sql", status: "backlog", priority: "high", notes: "Rolling avg 3m/6m, personal_mean, personal_stddev, z_score, trend_direction." },

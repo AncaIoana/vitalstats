@@ -185,30 +185,131 @@ These analytes appear in multiple units across labs and **must be normalised**:
 
 ---
 
-### Analyte Slug Mapping (partial — key analytes)
+### Analyte Slug Mapping
 
-Generated via: `lower(regexp_replace(analyte_name, '[^a-zA-Z0-9]+', '_', 'g'))`
+Full canonical mapping implemented in `dbt/models/staging/stg_google_sheets__blood_tests_vw.sql`.
+Multiple raw names mapping to the same slug are listed together.
 
-| Raw analyte name | Canonical slug |
-|---|---|
-| `ALT (Alanine aminotransferase)` | `alt` |
-| `AST (Aspartate aminotransferase)` | `ast` |
-| `Albumin (serum)` | `albumin` |
-| `Alkaline phosphatase (serum)` | `alkaline_phosphatase` |
-| `Bilirubin (serum)` | `bilirubin` |
-| `Bilirubin total` | `bilirubin` ← maps to same slug |
-| `Cholesterol HDL (serum)` | `cholesterol_hdl` |
-| `Cholesterol (non-HDL)` | `cholesterol_non_hdl` |
-| `Cholesterol (serum) / HDL ratio` | `cholesterol_hdl_ratio` |
-| `Ferritin (serum)` | `ferritin` |
-| `Glucose (fasting)` | `glucose_fasting` |
-| `HbA1c` | `hba1c` |
-| `Haemoglobin` | `haemoglobin` |
-| `TSH` | `tsh` |
-| `Vitamin D` | `vitamin_d` |
-| `White blood cell count WBC` | `wbc` |
-| `Red blood cell (RBC) count` | `rbc` |
-| `Platelet count` | `platelets` |
+| Raw analyte name(s) | Canonical slug | Notes |
+|---|---|---|
+| `ALT (Alanine aminotransferase)` | `alt` | |
+| `AST (Aspartate aminotransferase)` | `ast` | |
+| `Alkaline phosphatase (serum)` | `alkaline_phosphatase` | |
+| `GGT (gamma-glutamyl transferase) serum` | `ggt` | |
+| `Bilirubin (serum)`, `Bilirubin total`, `Total bilirubin` | `bilirubin` | Legacy name mapped |
+| `Albumin (serum)` | `albumin` | |
+| `Globulin (serum)` | `globulin` | |
+| `Protein`, `Protein - total (serum)` | `protein_total` | |
+| `Cholesterol total`, `Cholesterol total (serum)` | `cholesterol_total` | |
+| `Cholesterol HDL (serum)` | `hdl` | |
+| `Cholesterol LDL (calculated)` | `ldl_calculated` | |
+| `Cholesterol LDL (serum)` | `ldl_serum` | |
+| `Cholesterol VLDL (calculated)` | `cholesterol_vldl` | |
+| `Cholesterol (non-HDL)` | `cholesterol_non_hdl` | |
+| `Cholesterol (serum) / HDL ratio` | `hdl_ratio` | |
+| `Triglycerides` | `triglycerides` | |
+| `Creatinine (serum)` | `creatinine` | |
+| `eGFR (estimated glomerular filtration rate)` | `egfr` | |
+| `eGFRcreat (CKD-EPI)` | `ckd_epi` | |
+| `Acute Kidney Injury (AKI) Score` | `aki_score` | |
+| `Urea`, `Urea (serum)` | `urea` | |
+| `Urea Nitrogen (BUN)` | `bun` | |
+| `Sodium (serum)` | `sodium` | |
+| `Potassium (serum)` | `potassium` | |
+| `Phosphate (serum)`, `Serum inorganic phosphate` | `phosphate` | |
+| `Magnesium serum` | `magnesium` | |
+| `Calcium (serum)` | `calcium_serum` | |
+| `Calcium (corrected)`, `Calcium adjusted level` | `calcium_adjusted` | |
+| `Calcium (ionic)` | `calcium_ionic` | |
+| `Hemoglobin` | `haemoglobin` | NHS spelling used as canonical |
+| `Haematocrit (HCT)` | `hct` | |
+| `Red blood cell (RBC) count (erythrocytes / eritrocite)` | `rbc_count` | |
+| `White blood cell count WBC (Leukocyte count)` | `wbc` | |
+| `Platelet count (numar trombocite)` | `platelet_count` | |
+| `Mean corpuscular volume (MCV)` | `mcv` | |
+| `Mean corpuscular hemoglobin (MCH)` | `mch` | |
+| `Mean corpuscular hemoglobin concentration (MCHC)` | `mchc` | |
+| `Mean platelet volume (MPV)` | `mpv` | |
+| `Platelet distribution width (PDW)` | `pdw` | |
+| `Red cell distribution width (RDW)` | `rdw` | |
+| `Nucleated red blood cell count` | `nrbc_count` | |
+| `Neutrophil count`, `Neutrophils` | `neutrophil_count` | |
+| `Lymphocyte count`, `Lymphocytes` | `lymphocyte_count` | |
+| `Monocytes` | `monocyte_count` | |
+| `Eosinophil count`, `Eosinophil count raised`, `Eosinophils` | `eosinophil_count` | "raised" is a note, not part of the analyte |
+| `Basophil count`, `Basophils` | `basophil_count` | |
+| `Immature granulocytes count` | `immature_granulocytes` | |
+| `Reticulocytes` | `reticulocyte_count` | |
+| `Reticulocyte hemoglobin equivalent (RET-He)` | `ret_he` | |
+| `Immature reticulocyte fraction` | `immature_reticulocyte_fraction` | |
+| `Ferritin (serum)` | `ferritin` | |
+| `Iron serum (sideremia)`, `Serum iron level` | `iron_serum` | |
+| `Transferrin (serum)` | `transferrin` | |
+| `Transferrin saturation index` | `transferrin_saturation` | |
+| `Serum ceruloplasmin` | `ceruloplasmin` | |
+| `Glucose serum` | `glucose` | |
+| `Hemoglobin A1c (HbA1c) - past 2-3 months` | `hba1c` | |
+| `TSH (Thyroid-stimulating hormone)` | `tsh` | |
+| `FT4 (Free Thyroxine / Free T4)`, `FT4 (Tiroxina)` | `ft4` | Romanian synonym mapped |
+| `Anti-TPO (thyroid peroxidase antibodies)` | `anti_tpo` | |
+| `Cortisol (serum)` | `cortisol_serum` | |
+| `Cortisol (salivary)` | `cortisol_salivary` | |
+| `Cortisone (salivary)` | `cortisone_salivary` | |
+| `Urine free cortisol` | `cortisol_urine_free` | |
+| `Urine free cortisol excretion rate` | `cortisol_urine_excretion_rate` | |
+| `ONDST cortisol` | `ondst_cortisol` | Overnight dexamethasone suppression test |
+| `ACTH` | `acth` | |
+| `Androstenedione` | `androstenedione` | |
+| `Testosterone` | `testosterone` | |
+| `SHBG (Sex Hormone-Binding Globulin)` | `shbg` | |
+| `Free Androgen Index (FAI)` | `fai` | |
+| `Prolactin` | `prolactin` | |
+| `Estradiol (serum)` | `estradiol` | |
+| `FSH` | `fsh` | |
+| `LH` | `lh` | |
+| `IGF-1`, `GF-1` | `igf1` | GF-1 is a source typo |
+| `Plasma parathyroid hormone level` | `pth` | |
+| `Vitamin D  25-OH (serum)` | `vitamin_d` | |
+| `Vitamin D2  25-OH (serum)` | `vitamin_d2` | |
+| `Vitamin D3 25-HO (serum)` | `vitamin_d3` | |
+| `Vitamin B12 (serum)` | `vitamin_b12` | |
+| `Folate (serum)` | `folate` | |
+| `Copper (blood)` | `copper` | |
+| `Index Omega 3` | `omega3_index` | |
+| `Docosahexaenoic acid (DHA)` | `omega3_dha` | |
+| `Eicosapentaenoic acid (EPA)` | `omega3_epa` | |
+| `aPTT` | `aptt` | |
+| `INR` | `inr` | |
+| `Prothrombin time (Quick)` | `prothrombin_time` | |
+| `Prothrombin percent` | `prothrombin_percent` | |
+| `C-reactive protein (CRP)` | `crp` | |
+| `VSH` | `esr` | Romanian abbrev: Viteza de Sedimentare = ESR |
+| `Se CA 125 level` | `ca125` | |
+| `Tissue transglutaminase IgA level`, `Tissu transglutaminase IgA lev` | `ttg_iga` | Legacy typo mapped |
+| `CK (serum creatine kinase)` | `ck_total` | |
+| `Blood group OAB` | `blood_group` | |
+| `Rh factor` | `rh_factor` | |
+| `Campylobacter (faeces culture)`, `Campylobacter NOT isolated (faeces culture)` | `campylobacter_faeces_culture` | Legacy name mapped |
+| `Clos. difficile PCR` | `c_diff_pcr` | |
+| `Clos. difficile toxin A/B` | `c_diff_toxin_a_b` | |
+| `E.coli O157 (faeces culture)` | `e_coli_faeces_culture` | |
+| `Salmonella (faeces culture)` | `salmonella_faeces_culture` | |
+| `Shigella (faeces culture)` | `shigella_faeces_culture` | |
+| `Cryptosporidium (cumulative)` | `cryptosporidium_cumulative` | |
+| `Cryptosporidium (OCP PCR)` | `cryptosporidium_ocp_pcr` | |
+| `Giardia (cumulative)` | `giardia_cumulative` | |
+| `Giardia (OCP PCR)` | `giardia_ocp_pcr` | |
+| `Quantity faecal immunochemical test` | `fit_quantitative` | |
+| `STAIN` | `stain` | |
+| `MRSA screen` | `mrsa` | |
+| `HBsAg (screening)` | `hbsag` | |
+| `Hepatitis B Surface Antigen (final interpretation)` | `hepatitis_b` | |
+| `Hepatitis C Antibody (final interpretation)` | `hepatitis_c` | |
+| `HIV screen  (final interpretation)` | `hiv` | |
+
+> Any analyte not in this table falls back to an auto-generated slug:
+> `trim(lower(regexp_replace(analyte_name, '[^a-zA-Z0-9]+', '_', 'g')), '_')`
+> New analytes surface in `silver.stg_unknown_values` via the ingestion pipeline.
 
 ---
 
