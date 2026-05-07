@@ -103,7 +103,10 @@ parsed as (
         case
             when reference_interval_raw is null
               or trim(reference_interval_raw) = ''              then 'unknown'
-            when reference_interval_raw ~* '^n\/?a$'            then 'categorical'
+            when reference_interval_raw ~* '^\s*n\/?a\s*$'      then 'not_applicable'
+            when trim(reference_interval_raw) ~*
+                    '^\s*(negative|positive|not\s+detected|detected|reactive|non[- ]reactive)\s*$'
+                then 'categorical'
             when reference_interval_raw ~ '^[<＜]\s*[0-9]'      then 'lt'
             when reference_interval_raw ~ '^[>＞]\s*[0-9]'      then 'gt'
             when reference_interval_raw

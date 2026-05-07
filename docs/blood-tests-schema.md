@@ -116,7 +116,7 @@ Canonical reference ranges used by ML and anomaly detection live in
 | Pattern | Example | `ref_low` | `ref_high` | `ref_type` | `note` |
 |---|---|---|---|---|---|
 | Empty | `""` | None | None | `unknown` | None |
-| Not applicable | `"N/A"` | None | None | `categorical` | None |
+| Not applicable | `"N/A"` | None | None | `not_applicable` | None |
 | Simple range | `"35-50"` | 35.0 | 50.0 | `range` | None |
 | Range with spaces | `"2.20 - 2.60"` | 2.20 | 2.60 | `range` | None |
 | Range with unit glued | `"15.00-150.00ug/L"` | 15.0 | 150.0 | `range` | None |
