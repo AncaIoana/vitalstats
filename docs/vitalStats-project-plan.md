@@ -109,7 +109,7 @@ A Python script that reads your blood test Google Sheet, stores the raw data, tr
 1. Install PostgreSQL locally (or use SQLite to start even simpler)
 2. Write a loader script: raw JSON → `raw.blood_tests` table
 3. Set up dbt Core project:
-   - `staging/stg_blood_tests.sql` — clean column names, cast types, handle nulls
+   - `staging/stg_google_sheets__blood_tests_vw.sql` — clean column names, cast types, handle nulls
    - `intermediate/int_blood_tests_normalised.sql` — add reference range columns (e.g., is this value flagged high/low?)
    - `marts/mart_blood_trends.sql` — one row per marker per test date, with 3-month rolling average
 4. Add dbt schema tests: `not_null`, `unique`, `accepted_values`

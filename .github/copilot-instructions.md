@@ -8,7 +8,7 @@
 
 - **Developer:** Data engineer building a personal health intelligence platform called **health-intel**.
 - **Project path:** `/Users/anca/vitalStats/`
-- **Claude project:** Work is tracked in a Claude project called **vitalStats**. When project memory needs updating, provide the exact text to add.
+- **Claude project:** Work is tracked in a Claude project called **vitalStats**. When project memory needs updating, provide the exact text to add and explain where to add it. Claude project has access to all the docs, to README.md and to vs-board/src/App.jsx (but nothing else)
 - **Repository:** Public (portfolio project). **No real health data, no credentials, synthetic fixtures only** — non-negotiable.
 - **Kanban board:** can be found here: vs-board/src/App.jsx 
 - **Documentation:** all documentation is in `docs` directory; check there before starting work or answering questions, and make sure all these markdown

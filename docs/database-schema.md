@@ -151,40 +151,41 @@ Python ingestion writes to raw; dbt transforms to silver views.
 Cleaned and typed. One row per analyte per date per collection site.
 
 ```sql
-CREATE TABLE silver.stg_google_sheets__blood_tests_vw (
-    stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    test_date            DATE NOT NULL,                     -- parsed from "6-Apr-2023"
-    test_type            TEXT NOT NULL,                     -- "Biochemistry", "Hematology", etc.
-    analyte_name         TEXT NOT NULL,                     -- cleaned analyte name
-    analyte_slug         TEXT NOT NULL,                     -- "alt_alanine_aminotransferase"
-    result_numeric       NUMERIC(10, 4),                    -- NULL if non-numeric result
-    result_text          TEXT,                              -- "negative", "Not Detected", etc.
-    result_is_numeric    BOOLEAN NOT NULL,
-    unit                 TEXT,
-    unit_normalised      TEXT,                              -- canonical unit after conversion
-    result_normalised    NUMERIC(10, 4),                    -- result converted to canonical unit
-    ref_low              NUMERIC(10, 4),                    -- parsed lower bound
-    ref_high             NUMERIC(10, 4),                    -- parsed upper bound
-    ref_type             TEXT,                              -- "range", "lt", "gt", "categorical"
-    ref_text_raw         TEXT,                              -- original reference interval string
-    collection_site      TEXT,                              -- "New Islington", "Salford Royal", "Synevo"
-    notes                TEXT,
-    is_duplicate         BOOLEAN NOT NULL DEFAULT FALSE,
-    source_row_hash      TEXT NOT NULL,                     -- FK to raw table
-    loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- dbt view — created automatically by: dbt run --select stg_google_sheets__blood_tests_vw
+-- Do NOT create this manually. Source: raw.blood_tests_raw
 
-CREATE INDEX idx_stg_bt_date ON silver.stg_google_sheets__blood_tests_vw(test_date);
-CREATE INDEX idx_stg_bt_analyte ON silver.stg_google_sheets__blood_tests_vw(analyte_slug);
-CREATE INDEX idx_stg_bt_date_analyte ON silver.stg_google_sheets__blood_tests_vw(test_date, analyte_slug);
+SELECT
+    id,                    -- physical row id from raw table
+    test_date,             -- DATE, parsed from date_raw
+    test_type,             -- lowercase, validated at ingestion
+    analyte_name,          -- trimmed original name
+    analyte_slug,          -- canonical slug (see blood-tests-schema.md for full mapping)
+    result_qualifier,      -- 'lt' | 'gt' | NULL
+    result_numeric,        -- NUMERIC, NULL for categorical results
+    result_is_numeric,     -- BOOLEAN
+    result_text,           -- normalised slug for categorical results
+    unit,                  -- raw unit, NULL if blank
+    unit_normalised,       -- NULL here — populated in intermediate layer
+    result_normalised,     -- NULL here — populated in intermediate layer
+    ref_type,              -- 'range' | 'lt' | 'gt' | 'categorical' | 'narrative' | 'unknown'
+    ref_low,               -- NUMERIC lower bound
+    ref_high,              -- NUMERIC upper bound
+    ref_text_raw,          -- original reference interval string preserved verbatim
+    collection_site,       -- lab / practice name
+    notes,
+    is_duplicate,          -- always FALSE — view surfaces latest version only
+    source_row_hash,       -- SHA-256 from raw row
+    loaded_at              -- ingested_at from raw row
 ```
 
 **Key transformation logic in dbt:**
-- Parse `"6-Apr-2023"` → `DATE`
-- Parse `"< 0.6"` → `result_numeric = 0.6`, `ref_type = "lt"`
-- Convert `mg/dL` ↔ `mmol/L` for analytes measured in both (cholesterol, glucose, calcium)
-- Generate `analyte_slug` for consistent joining: `lower(regexp_replace(analyte_name, '[^a-zA-Z0-9]', '_', 'g'))`
-- Detect duplicates via `row_hash` comparison
+- Parse "6-Apr-2023" → DATE using to_date(nullif(trim(date_raw),''), 'DD-Mon-YYYY')
+- Parse "< 0.6" → result_numeric = 0.6, result_qualifier = 'lt', result_is_numeric = TRUE
+- Categorical strings ("negative", "Not Detected") → result_text, result_is_numeric = FALSE
+- Parse reference_interval_raw → ref_low, ref_high, ref_type (range/lt/gt/narrative/unknown)
+- Generate analyte_slug — canonical mapping in slugged CTE (see blood-tests-schema.md)
+- Deduplicate via row_number() OVER (PARTITION BY test_date, analyte_slug, collection_site ORDER BY loaded_at DESC) — keeps latest ingested version only
+- unit_normalised and result_normalised are NULL placeholders — populated in int_google_sheets__blood_tests_normalised_vw
 
 ---
 
@@ -270,11 +271,11 @@ CREATE TABLE silver.stg_flo_symptoms (
 
 ---
 
-### `silver.silver.stg_google_sheets__medications_vw`
+### `silver.stg_google_sheets__medications_vw`
 One row per medication period. Same medication appears multiple times as dosage or frequency changes over time.
 
 ```sql
-CREATE TABLE silver.silver.stg_google_sheets__medications_vw (
+CREATE TABLE silver.stg_google_sheets__medications_vw (
     stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     medication_name      TEXT NOT NULL,
     medication_slug      TEXT NOT NULL,                     -- "metyrapone", "ferrous_sulfate" etc.
@@ -291,8 +292,8 @@ CREATE TABLE silver.silver.stg_google_sheets__medications_vw (
     loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_stg_med_slug ON silver.silver.stg_google_sheets__medications_vw(medication_slug);
-CREATE INDEX idx_stg_med_dates ON silver.silver.stg_google_sheets__medications_vw(start_date, end_date);
+CREATE INDEX idx_stg_med_slug ON silver.stg_google_sheets__medications_vw(medication_slug);
+CREATE INDEX idx_stg_med_dates ON silver.stg_google_sheets__medications_vw(start_date, end_date);
 ```
 
 **Key transformation logic:**
@@ -583,7 +584,7 @@ CREATE TABLE silver.stg_unknown_values (
 | Scenario | Steps | dbt command |
 |---|---|---|
 | New analyte | Add to `mart_reference_ranges` + `mart_analyte_reference` → run dbt | `dbt run` |
-| New collection site | Update `known_values.py` → delete affected Silver rows → rebuild | `dbt run --full-refresh --select stg_blood_tests` |
+| New collection site | Update `known_values.py` → delete affected Silver rows → rebuild | `dbt run --full-refresh --select stg_google_sheets__blood_tests_vw` |
 
 After resolving either scenario:
 ```sql
@@ -617,9 +618,10 @@ Canonical units follow NHS convention (mmol/L, μmol/L, g/L etc.) as that is the
 
 | Model | Test | Description |
 |---|---|---|
-| `stg_blood_tests` | `not_null` | `test_date`, `analyte_name`, `collection_site` |
-| `stg_blood_tests` | `unique` | `(test_date, analyte_slug, collection_site)` composite |
-| `stg_blood_tests` | `accepted_values` | `test_type` in known categories |
+| `stg_google_sheets__blood_tests_vw` | `not_null` | `test_date`, `analyte_name`, `collection_site` |
+| `stg_google_sheets__blood_tests_vw` | `not_null` | `test_date`, `analyte_name`, `analyte_slug`, `collection_site`, `result_is_numeric`, `is_duplicate`, `source_row_hash`, `loaded_at` |
+| `stg_google_sheets__blood_tests_vw` | `unique` | `source_row_hash` |
+| `stg_google_sheets__blood_tests_vw` | `accepted_values` | `test_type` in known categories |
 | `mart_blood_trends` | custom | `z_score` must be computable when `reading_count >= 3` |
 | `mart_blood_trends` | custom | `trend_direction` not null when `reading_count >= 4` |
 | `mart_health_timeline` | `not_null` | `event_date`, `event_type`, `source_system` |

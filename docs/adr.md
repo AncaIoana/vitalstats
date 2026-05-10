@@ -65,7 +65,7 @@ Adopt the Medallion Architecture:
 Blood test data has ~80+ analytes but each test only measures a subset. Two schema options: wide (one column per analyte) or long (one row per analyte).
 
 **Decision:**  
-Store in long/narrow format in Silver (`stg_blood_tests`): one row per analyte per date.  
+Store in long/narrow format in Silver (`stg_google_sheets__blood_tests_vw`): one row per analyte per date.  
 Pivot to wide format only in `mart_ml_features` (Gold) for ML use cases.
 
 **Alternatives considered:**
@@ -292,7 +292,7 @@ vitalStats/
 Synevo lab (Romania) reports in mg/dL; NHS labs report in mmol/L. Same analyte, different values, can't be compared without conversion.
 
 **Decision:**  
-Canonical unit for all blood markers follows NHS/SI convention (mmol/L, μmol/L, g/L, etc.). Conversion happens in `silver.stg_blood_tests` dbt staging model.
+Canonical unit for all blood markers follows NHS/SI convention (mmol/L, μmol/L, g/L, etc.). Conversion happens in `silver.stg_google_sheets__blood_tests_vw` dbt staging model.
 
 **Consequences:**
 - All downstream analysis uses consistent units
@@ -414,7 +414,7 @@ Treat new analytes and new collection sites differently, because they carry diff
 
 **New analyte — low risk, ingest and continue:**
 - A new analyte is just a new row in a long/narrow schema — no schema change required (ADR-003)
-- Ingest normally into `raw.blood_tests_raw` and `silver.stg_blood_tests`
+- Ingest normally into `raw.blood_tests_raw` and `silver.stg_google_sheets__blood_tests_vw`
 - `is_in_range` will be NULL (no canonical reference range exists yet) — this is acceptable
 - Log the new analyte to `silver.stg_unknown_values` for review
 - Pipeline status remains `"success"`
@@ -448,8 +448,8 @@ No raw or Silver data needs to change. dbt re-reads Silver with the new referenc
 *New collection site (high risk):*
 1. Update `ingestion/config/known_values.py` with the new site and its unit conventions
 2. Update analyte slug mappings if the new lab uses different naming
-3. Delete affected rows from `silver.stg_blood_tests` only — never touch `raw.blood_tests_raw`
-4. Run `dbt run --full-refresh --select stg_blood_tests` — rebuilds Silver from raw with correct unit conversions applied to all historical rows
+3. Delete affected rows from `silver.stg_google_sheets__blood_tests_vw` only — never touch `raw.blood_tests_raw`
+4. Run `dbt run --full-refresh --select stg_google_sheets__blood_tests_vw` — rebuilds Silver from raw with correct unit conversions applied to all historical rows
 5. Run `dbt run` for downstream marts — Gold rebuilds from corrected Silver
 6. Mark `stg_unknown_values.resolved = TRUE`
 

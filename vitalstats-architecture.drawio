@@ -130,10 +130,10 @@
                 <mxCell id="silver-title" value="&lt;b&gt;PostgreSQL — silver schema&lt;/b&gt;  (dbt staging models)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontColor=#4a4a9e;fontStyle=1;" parent="1" vertex="1">
                     <mxGeometry x="210" y="715" width="600" height="20" as="geometry"/>
                 </mxCell>
-                <mxCell id="stg-blood" value="stg_blood_tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                <mxCell id="stg-blood" value="stg_google_sheets__blood_tests_vw" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
                     <mxGeometry x="215" y="738" width="140" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="stg-meno" value="stg_menoscale" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
+                <mxCell id="stg-meno" value="stg_google_sheets__menoscale_vw" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">
                     <mxGeometry x="370" y="738" width="130" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="stg-meds" value="stg_medications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c7d2fe;strokeColor=#4a4a9e;fontSize=10;" parent="1" vertex="1">

@@ -47,6 +47,7 @@ Built for one user. Designed to grow.
 | s10 | Implement unknown value detection + stg_unknown_values | ✅ Done |
 | s11 | Implement error handling strategy | ✅ Done |
 | s14 | Set up dbt Core project | ✅ Done |
+| s15 | Write stg_google_sheets__blood_tests_vw | ✅ Done |
 ---
 
 ## Architecture
@@ -291,6 +292,11 @@ uv run python -m ingestion.google_sheets.extract_blood_tests
 
 # Ingest menoscale scores
 uv run python -m ingestion.google_sheets.extract_menoscale
+
+# Run dbt transformations
+cd dbt
+uv run dbt run
+uv run dbt test
 ```
 
 > A `Makefile` with shorthand commands (`make ingest`, `make test` etc.) is planned for a later story.
