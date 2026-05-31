@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions — health-intel (vitalStats)
+# GitHub Copilot Instructions — vitalStats
 
 ## Project Path
 - `/Users/anca/projects/vitalstats`
@@ -6,8 +6,8 @@
 
 ## Project Context
 
-- **Developer:** Data engineer building a personal health intelligence platform called **health-intel**.
-- **Project path:** `/Users/anca/vitalStats/`
+- **Developer:** Data engineer building a personal health intelligence platform called **vitalStats**.
+- **Project path:** `/Users/anca/vitalstats/`
 - **Claude project:** Work is tracked in a Claude project called **vitalStats**. When project memory needs updating, provide the exact text to add and explain where to add it. Claude project has access to all the docs, to README.md and to vs-board/src/App.jsx (but nothing else)
 - **Repository:** Public (portfolio project). **No real health data, no credentials, synthetic fixtures only** — non-negotiable.
 - **Kanban board:** can be found here: vs-board/src/App.jsx 
