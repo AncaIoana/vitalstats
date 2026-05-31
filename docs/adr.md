@@ -359,6 +359,7 @@ Classify errors into two tiers and handle them differently:
 On a hard failure: log to `pipeline_run_log` with `status = "failed"`, full error message and traceback. Update `pipeline_state` to `status = "failed"`. Do not write any data to raw tables. Stop.
 
 **Soft failures — skip the row, continue the run:**
+- Individual row is missing a critical field (Date for blood tests and menoscale — row skipped, logged to skipped_detail)
 - Individual row has an unparseable date
 - Individual row has an unrecognised result format
 - Individual row is missing a non-critical field

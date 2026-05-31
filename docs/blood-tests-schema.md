@@ -345,7 +345,7 @@ The menoscale tab uses **two different date formats** (unlike `blood_tests_bulk`
 **Handling:** The ingestion script must try both formats with a fallback:
 
 ```python
-def parse_menoscale_date(raw: str) -> date:
+def _parse_menoscale_date(raw: str) -> date:
     raw = raw.strip()
     for fmt in ("%d-%b-%Y", "%d %b %Y", "%d-%B-%Y", "%d %B %Y"):
         try:
@@ -360,19 +360,20 @@ This also handles full month names (`"April"`) in case future entries use those.
 ### Staging model: `silver.stg_google_sheets__menoscale_vw`
 
 ```sql
-CREATE TABLE silver.stg_google_sheets__menoscale_vw (
-    stg_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recorded_date    DATE NOT NULL,
-    score            INTEGER NOT NULL CHECK (score >= 0 AND score <= 100),
-    source_row_hash  TEXT NOT NULL,
-    loaded_at        TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- dbt view — created automatically by: dbt run --select stg_google_sheets__menoscale_vw
+-- Do NOT create this manually. Source: raw.menoscale_raw
+SELECT
+    id,                    -- physical row id from raw table
+    menoscale_date,        -- DATE, parsed from date_raw
+    menoscale_score,       -- NUMERIC, cast from score_raw
+    source_row_hash,       -- SHA-256 from raw row
+    loaded_at              -- ingested_at from raw row
 ```
 
 ### dbt tests
-- `not_null` on `recorded_date`, `score`
-- `unique` on `recorded_date`
-- `accepted_range` custom test: `score between 0 and 100`
+- `not_null` on `menoscale_date`, `menoscale_score`
+- `unique` on `menoscale_date`
+- `not_null` on `menoscale_score` — a NULL score carries no information and cannot be used for trend analysis or ML
 
 ### Mart output
 Included in `gold.mart_health_timeline` with:

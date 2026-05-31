@@ -165,3 +165,45 @@ def test_run_skips_row_with_invalid_score(
     mock_fail_run.assert_not_called()
     mock_finish_run.assert_called_once()
 
+
+# ── Test 4: soft failure when date is empty ────────────────────────────
+
+@patch(f"{_MOD}.write_raw_json")
+@patch(f"{_MOD}.get_existing_hashes")
+@patch(f"{_MOD}.get_previous_row_count")
+@patch(f"{_MOD}.finish_run")
+@patch(f"{_MOD}.fail_run")
+@patch(f"{_MOD}.fetch_tab")
+@patch(f"{_MOD}.start_run")
+@patch(f"{_MOD}.get_db_connection")
+def test_run_skips_row_with_empty_date(
+    mock_get_conn,
+    mock_start_run,
+    mock_fetch_tab,
+    mock_fail_run,
+    mock_finish_run,
+    mock_prev_count,
+    mock_existing_hashes,
+    mock_write_json,
+):
+    """
+    When fetch_tab returns rows with empty date, run() should:
+    - never call fail_run exactly
+    - call finish_run once
+    """
+    # ── Arrange ──────────────────────────────────────────────────────────────
+    mock_get_conn.return_value = MagicMock()
+    mock_start_run.return_value = "test-run-id-004"
+    mock_fetch_tab.return_value = [
+        {"Date": "", "Score (out of 100)": "25"},
+    ]
+    mock_prev_count.return_value = 0
+
+    # ── Act ──────────────────────────────────────────────────────────────────
+    with patch("os.environ.get", return_value="fake-sheet-id"):
+        from ingestion.google_sheets.extract_menoscale import run
+        run()
+
+    # ── Assert ───────────────────────────────────────────────────────────────
+    mock_fail_run.assert_not_called()
+    mock_finish_run.assert_called_once()
