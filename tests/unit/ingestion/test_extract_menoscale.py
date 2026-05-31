@@ -21,6 +21,11 @@ def test_parse_invalid_raises():
         _parse_menoscale_date("not-a-date")
 
 
+def test_parse_empty_raises():
+    with pytest.raises(ValueError):
+        _parse_menoscale_date("")
+
+
 # test _validate_score ────────────────────────────────────────────────────
 def test_validate_score_valid():
     assert _validate_score("14") == 14

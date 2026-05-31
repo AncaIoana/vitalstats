@@ -169,7 +169,7 @@ def run() -> None:
                     "row": {k: str(v) for k, v in row.items()},
                 })
                 rows_failed += 1
-                log.warning("Skipping row with unparseable date: %s", row.get("Date"))
+                log.warning("Skipping row with unparseable date.")
                 continue
             
             # Validate the score

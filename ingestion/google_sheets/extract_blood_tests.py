@@ -151,6 +151,18 @@ def run() -> None:
         for row in rows:
             row_hash = hash_row(row)
 
+            # Missing date → soft failure, skip row
+            collection_date = row.get("Date")
+            if not collection_date or not collection_date.strip():
+                skipped_detail.append({
+                    "type": "missing_field",
+                    "field": "Date",
+                    "row": {k: str(v) for k, v in row.items()},
+                })
+                rows_failed += 1
+                log.warning("Skipping row with missing date: %s", row.get("Analyte"))
+                continue
+            
             # Missing test type → soft failure, skip row
             test_type = row.get("Test Type")
             if not test_type or not test_type.strip():
@@ -251,7 +263,7 @@ def run() -> None:
         log.info("Inserted %d rows into %s", len(new_rows), RAW_TABLE)
 
         # ── 6. Finalise pipeline state ────────────────────────────────────────
-        final_status = "partial" if has_unknown_site else "success"
+        final_status = "partial" if (has_unknown_site or skipped_detail) else "success"
         finish_run(
             conn,
             run_id,
