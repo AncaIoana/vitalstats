@@ -48,6 +48,7 @@ Built for one user. Designed to grow.
 | s11 | Implement error handling strategy | ✅ Done |
 | s14 | Set up dbt Core project | ✅ Done |
 | s15 | Write stg_google_sheets__blood_tests_vw | ✅ Done |
+| s16 | Write stg_google_sheets__menoscale_vw | ✅ Done |
 ---
 
 ## Architecture
