@@ -190,19 +190,25 @@ SELECT
 ---
 
 ### `silver.stg_google_sheets__menoscale_vw`
-Cleaned menoscale scores.
+Cleaned menoscale scores. One row per recorded date.
 
 ```sql
-CREATE TABLE silver.stg_google_sheets__menoscale_vw (
-    stg_id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recorded_date        DATE NOT NULL,
-    total_score          NUMERIC(6, 2),
-    -- individual symptom columns to be confirmed once tab structure is shared
-    notes                TEXT,
-    source_row_hash      TEXT NOT NULL,
-    loaded_at            TIMESTAMP NOT NULL DEFAULT NOW()
-);
+-- dbt view — created automatically by: dbt run --select stg_google_sheets__menoscale_vw
+-- Do NOT create this manually. Source: raw.menoscale_raw
+
+SELECT
+    id,                    -- physical row id from raw table
+    menoscale_date,        -- DATE, parsed from date_raw
+    menoscale_score,       -- NUMERIC, cast from score_raw
+    source_row_hash,       -- SHA-256 from raw row
+    loaded_at              -- ingested_at from raw row
 ```
+
+**Key transformation logic in dbt:**
+- Normalise date separators: regexp_replace(date_raw, '-', ' ', 'g') handles both "6-Sep-2024" and "16 Apr 2025" variants
+- Parse to DATE using to_date(nullif(trim(...), ''), 'DD Mon YYYY')
+- Cast score_raw to NUMERIC
+- Deduplicate via row_number() OVER (PARTITION BY menoscale_date ORDER BY loaded_at DESC, id DESC) — keeps latest ingested version only
 
 ---
 
@@ -427,7 +433,7 @@ CREATE TABLE gold.mart_ml_features (
     -- ... one set per analyte
 
     -- Menoscale features (Phase 1b)
-    menoscale_total_score                  NUMERIC,
+    menoscale_score                  NUMERIC,
 
     -- Flo features (Phase 4)
     flo_cycle_phase                        TEXT,       -- "menstruation" | "follicular" | "ovulatory" | "luteal"

@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_google_sheets__menoscale_vw
+    description: >
+      Staging view for MenoScale data ingested from Google Sheets.
+      Parses the raw date string into a typed DATE column, casts the score to
+      NUMERIC, and deduplicates to the latest ingested version of each logical row.
+      A logical row is uniquely identified by menoscale_date.
+      Rows are never deleted from the raw source — edits produce new raw rows with
+      a different hash. This view surfaces only the most recently ingested version.
+    columns:
+      - name: id
+        description: >
+          Physical row identifier from raw.menoscale_raw. Not a logical unique key —
+          the same entry may have multiple raw rows if edited and re-ingested.
+        tests:
+          - not_null
+
+      - name: menoscale_date
+        description: >
+          Date the MenoScale score was recorded, parsed from the raw string.
+          Handles two source variants: "6-Sep-2024" (hyphen-separated) and
+          "16 Apr 2025" (space-separated) — both normalised to 'DD Mon YYYY' before parsing.
+          NULL if the date string could not be parsed — rows with NULL menoscale_date
+          will fail this test and surface for investigation.
+        tests:
+          - not_null
+          - unique
+
+      - name: menoscale_score
+        description: >
+          MenoScale score out of 100, cast to NUMERIC from the raw string.
+        tests:
+          - not_null
+
+      - name: source_row_hash
+        description: >
+          SHA-256 hash of the raw row content, carried from raw.menoscale_raw.
+          Used to trace any silver row back to its exact raw source version.
+        tests:
+          - not_null
+          - unique
+
+      - name: loaded_at
+        description: Timestamp when the raw row was ingested into raw.menoscale_raw.
+        tests:
+          - not_null
